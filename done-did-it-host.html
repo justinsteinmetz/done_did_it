@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DONE DID IT</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+<style>
+:root {
+  --bg:#000;--surface:#0D0D0D;--raised:#1A1A1A;
+  --border:rgba(255,255,255,0.1);--border-bright:rgba(255,255,255,0.22);
+  --text:#FFF;--muted:#555;--mid:#888;
+  --correct:#25D366;--correct-dim:rgba(37,211,102,0.12);--correct-border:rgba(37,211,102,0.4);
+  --wrong:#FF3040;--wrong-dim:rgba(255,48,64,0.12);--wrong-border:rgba(255,48,64,0.4);
+  --rc:#FE2C55;--rc-dim:rgba(254,44,85,0.12);--rc-border:rgba(254,44,85,0.4);
+  --r1:#FE2C55;--r1d:rgba(254,44,85,0.12);--r1b:rgba(254,44,85,0.4);
+  --r2:#FF9900;--r2d:rgba(255,153,0,0.12);--r2b:rgba(255,153,0,0.4);
+  --r3:#A259FF;--r3d:rgba(162,89,255,0.12);--r3b:rgba(162,89,255,0.4);
+  --r4:#25D366;--r4d:rgba(37,211,102,0.12);--r4b:rgba(37,211,102,0.4);
+  --r5:#00B4D8;--r5d:rgba(0,180,216,0.12);--r5b:rgba(0,180,216,0.4);
+  --rb:#FE2C55;--rbd:rgba(254,44,85,0.12);--rbb:rgba(254,44,85,0.4);
+  --border-dark:rgba(255,255,255,0.14);
+  --shadow-sm:none;--shadow-md:none;--shadow-lg:none;--radius:0px;--radius-sm:3px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* Round body tints — each round subtly shifts the screen atmosphere */
+body[data-round="1"] { --surface:#0F0A0B; --raised:#1A0F11; }
+body[data-round="2"] { --surface:#0F0B08; --raised:#1A1208; }
+body[data-round="3"] { --surface:#0A080F; --raised:#100F1A; }
+body[data-round="4"] { --surface:#080F0A; --raised:#0F1A10; }
+body[data-round="5"] { --surface:#060E12; --raised:#0C1820; }
+body[data-round="boss"] { --surface:#100508; --raised:#1A0810; }
+
+/* Post card border accent per round */
+body[data-round] .post-card { border-left: 2px solid transparent; }
+body[data-round="1"] .post-card { border-left-color: rgba(254,44,85,0.25); }
+body[data-round="2"] .post-card { border-left-color: rgba(255,153,0,0.2); }
+body[data-round="3"] .post-card { border-left-color: rgba(162,89,255,0.2); }
+body[data-round="4"] .post-card { border-left-color: rgba(37,211,102,0.2); }
+body[data-round="5"] .post-card { border-left-color: rgba(0,180,216,0.2); }
+body[data-round="boss"] .post-card { border-left-color: rgba(254,44,85,0.4); }
+.wrap{width:100%;max-width:480px;margin:0 auto;padding:0 0 60px;position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+.screen{display:none;flex-direction:column;align-items:center;width:100%}
+.screen.active{display:flex}
+
+.logo{
+  font-family:'Inter',sans-serif;font-weight:900;
+  font-size:clamp(44px,13vw,72px);
+  letter-spacing:-0.06em;line-height:0.88;
+  text-align:left;color:var(--text);
+  margin-bottom:2px;user-select:none;
+  width:100%;
+}
+.logo em{font-style:normal;color:var(--rc)}
+.logo-eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px;width:100%;display:block;
+}
+.logo span{color:var(--rc)}
+.logo-sub{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:32px}
+
+.post-card{width:100%;background:var(--surface);border-bottom:1px solid var(--border);margin-bottom:1px}
+.post-header{display:flex;align-items:center;gap:10px;padding:12px 16px 8px}
+.post-avatar{width:34px;height:34px;border-radius:50%;background:var(--raised);border:2px solid var(--rc);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.post-handle{font-size:13px;font-weight:700;color:var(--text)}
+.post-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-left:auto}
+.post-body{padding:10px 16px 16px}
+.post-context{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.post-text{font-size:clamp(19px,4vw,25px);font-weight:700;line-height:1.35;letter-spacing:-0.02em}
+.post-blank{display:inline-block;min-width:110px;border-bottom:2px solid var(--rc);color:var(--rc);text-align:center;padding:0 6px;vertical-align:bottom;font-style:italic;transition:all 0.2s}
+.post-blank.correct{color:var(--correct);border-bottom-color:var(--correct);font-style:normal}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;letter-spacing:-0.01em;border:none;cursor:pointer;width:100%;padding:16px 20px;border-radius:var(--radius-sm);transition:opacity 0.12s,transform 0.1s}
+.btn:active{transform:scale(0.97)}
+.btn-primary{background:var(--text);color:#000;margin-bottom:10px}
+.btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border-bright);margin-bottom:10px}
+.btn-secondary:hover{border-color:var(--rc);color:var(--rc)}
+.btn-accent{background:var(--rc);color:#fff;margin-bottom:10px}
+.btn-ghost{background:none;border:none;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;cursor:pointer;padding:10px;margin-top:4px}
+.btn-ghost:hover{color:var(--text)}
+.btn:disabled{opacity:0.25;cursor:not-allowed}
+
+.field-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);align-self:flex-start;margin-bottom:6px}
+input[type=text]{width:100%;background:var(--raised);border:1px solid var(--border-bright);border-radius:var(--radius-sm);color:var(--text);font-family:'Inter',sans-serif;font-size:17px;font-weight:500;padding:14px 16px;margin-bottom:14px;outline:none;transition:border-color 0.2s;-webkit-appearance:none}
+input[type=text]:focus{border-color:var(--rc)}
+input[type=text]::placeholder{color:var(--muted);font-size:14px}
+select{width:100%;background:var(--raised);border:1px solid var(--border-bright);border-radius:var(--radius-sm);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;font-weight:500;padding:14px 16px;margin-bottom:14px;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none}
+.err{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--wrong);margin-bottom:10px;min-height:18px;align-self:flex-start}
+
+#menu{text-align:center;padding-top:60px}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-bottom:10px}
+
+.notif-pill{display:inline-flex;align-items:center;gap:6px;background:var(--rc);color:#fff;border-radius:3px;padding:6px 14px;font-size:12px;font-weight:700;letter-spacing:0.02em;margin-bottom:20px}
+
+.code-card{width:100%;background:var(--surface);border-bottom:1px solid var(--border);padding:32px 20px;text-align:center;margin-bottom:1px;border-top:3px solid var(--rc)}
+.code-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.code-value{font-family:'Inter',sans-serif;font-weight:900;font-size:72px;letter-spacing:0.04em;color:var(--text);line-height:1;margin-bottom:4px}
+.code-sub{font-size:13px;color:var(--muted);margin-top:6px}
+
+.plist-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;align-self:flex-start;padding:0 16px}
+.pchips{display:flex;flex-wrap:wrap;gap:8px;min-height:44px;width:100%;margin-bottom:20px;padding:0 16px}
+.pchip{background:var(--raised);border:1px solid var(--border-bright);border-radius:3px;padding:6px 14px;font-size:13px;font-weight:600;animation:popIn 0.18s ease}
+@keyframes popIn{from{opacity:0;transform:scale(0.75)}to{opacity:1;transform:scale(1)}}
+
+.game-header{width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px}
+.round-tag{background:var(--rc-dim);color:var(--rc);border:1px solid var(--rc-border);border-radius:3px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;font-weight:700}
+.q-counter{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;color:var(--mid)}
+.ans-count{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+
+.timer-wrap{width:100%;height:2px;background:var(--raised);margin-bottom:0}
+.timer-fill{height:100%;background:var(--rc);transition:width 0.1s linear}
+.timer-fill.urgent{background:var(--wrong)}
+
+.host-opts{display:grid;grid-template-columns:1fr 1fr;gap:1px;width:100%;margin-bottom:1px;background:var(--border)}
+.host-opt{background:var(--surface);padding:16px 12px;text-align:center;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;position:relative;color:var(--text)}
+.host-opt.is-correct{background:var(--correct-dim);color:var(--correct)}
+.host-opt .opt-count{position:absolute;top:6px;right:8px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)}
+
+.lb-card{width:100%;background:var(--surface);border-bottom:1px solid var(--border);margin-bottom:1px}
+.lb-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;align-self:flex-start;padding:0 16px}
+.lb-row{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--border)}
+.lb-row:last-child{border-bottom:none}
+.lb-pos{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);width:20px}
+.lb-name{font-size:14px;font-weight:600;flex:1;margin:0 10px}
+.lb-score{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--rc)}
+.lb-row.top{background:var(--rc-dim)}
+.lb-row.top .lb-pos{color:var(--rc)}
+
+#player-game{text-align:left;width:100%}
+.pq-text{font-size:clamp(20px,4.5vw,26px);font-weight:700;line-height:1.35;letter-spacing:-0.02em;margin-bottom:0;min-height:64px}
+.p-opts{display:grid;grid-template-columns:1fr 1fr;gap:1px;width:100%;margin-bottom:1px;background:var(--border)}
+.p-opt{background:var(--surface);color:var(--text);font-family:'Inter',sans-serif;font-weight:700;font-size:clamp(14px,3vw,17px);padding:22px 14px;cursor:pointer;transition:background 0.1s;text-align:center;border:none}
+.p-opt:hover:not(:disabled){background:var(--raised)}
+.p-opt:disabled{cursor:not-allowed;opacity:0.35}
+.p-opt.answered-correct{background:var(--correct-dim)!important;color:var(--correct)!important;opacity:1!important}
+.p-opt.answered-wrong{background:var(--wrong-dim)!important;color:var(--wrong)!important;opacity:1!important}
+.p-opt.reveal-correct{background:var(--correct-dim)!important;color:var(--correct)!important;opacity:1!important}
+
+.swipe-area{width:100%;display:flex;gap:1px;margin-bottom:1px;background:var(--border)}
+.swipe-btn{flex:1;padding:28px 10px;font-family:'Inter',sans-serif;font-weight:800;font-size:17px;letter-spacing:-0.02em;border:none;cursor:pointer;transition:background 0.1s;background:var(--surface)}
+.swipe-pp{color:var(--r1)}.swipe-pp:hover:not(:disabled){background:var(--r1d)}
+.swipe-ps{color:var(--r2)}.swipe-ps:hover:not(:disabled){background:var(--r2d)}
+.swipe-btn:disabled{opacity:0.3;cursor:not-allowed}
+.swipe-btn.chosen-correct{background:var(--correct-dim)!important;color:var(--correct)!important;opacity:1!important}
+.swipe-btn.chosen-wrong{background:var(--wrong-dim)!important;color:var(--wrong)!important;opacity:1!important}
+.swipe-btn.reveal-correct{background:var(--correct-dim)!important;color:var(--correct)!important;opacity:1!important}
+
+.justify-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0;display:block;padding:12px 16px 8px}
+.justify-tiles{display:flex;flex-direction:column;gap:1px;width:100%;margin-bottom:1px;background:var(--border)}
+.j-tile{background:var(--surface);padding:16px;font-size:14px;font-weight:500;cursor:pointer;transition:background 0.1s;width:100%;text-align:left;color:var(--text);border:none}
+.j-tile:hover:not(.locked){background:var(--raised)}
+.j-tile.j-correct{background:var(--correct-dim)!important;color:var(--correct)!important}
+.j-tile.j-wrong{background:var(--wrong-dim)!important;color:var(--wrong)!important}
+.j-tile.locked{cursor:not-allowed;opacity:0.6}
+
+#boss-input-wrap{display:none;width:100%;margin-bottom:1px}
+.boss-card{background:var(--rc-dim);border-bottom:1px solid var(--rc-border);padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--rc);text-transform:uppercase}
+
+.pfeedback{font-family:'Inter',sans-serif;font-size:14px;font-weight:600;min-height:20px;padding:12px 16px;letter-spacing:-0.01em}
+.fb-correct{color:var(--correct)}.fb-wrong{color:var(--wrong)}.fb-wait{color:var(--muted)}
+
+.score-strip{width:100%;background:var(--surface);border-top:1px solid var(--border);padding:12px 0;display:flex}
+.score-item{flex:1;text-align:center;border-right:1px solid var(--border)}
+.score-item:last-child{border-right:none}
+.score-val{font-family:'Inter',sans-serif;font-weight:800;font-size:28px;color:var(--rc);line-height:1;letter-spacing:-0.03em;display:block;margin-bottom:2px}
+.score-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)}
+
+.lives-row{display:flex;gap:3px;align-items:flex-end;padding:0 4px}
+.bar{width:5px;border-radius:1px;background:var(--rc);transition:all 0.25s}
+.bar.b1{height:8px}.bar.b2{height:12px}.bar.b3{height:16px}
+.bar.dead{background:var(--raised)}
+
+#s-round-screen{text-align:left;padding:0;overflow:hidden}
+
+/* Round transition — full screen colour flood */
+.rt-hero{
+  width:100%;
+  min-height:52vh;
+  background:var(--rc-dim);
+  border-bottom:1px solid var(--rc-border);
+  padding:48px 20px 32px;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  position:relative;
+  overflow:hidden;
+}
+.rt-hero::before{
+  content:'';
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 120% 80% at 10% 110%, var(--rc) 0%, transparent 65%);
+  opacity:0.15;
+  pointer-events:none;
+}
+.rt-round-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--rc);margin-bottom:12px;opacity:0.8;
+}
+.rt-name{
+  font-family:'Inter',sans-serif;font-weight:900;
+  font-size:clamp(48px,11vw,72px);
+  letter-spacing:-0.05em;color:var(--text);
+  line-height:0.9;margin-bottom:0;
+}
+.rt-name em{font-style:normal;color:var(--rc)}
+.rt-mechanic{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--mid);
+  letter-spacing:0.08em;
+  margin-top:14px;
+  text-transform:uppercase;
+}
+.rt-body{padding:20px}
+.rt-rule-card{
+  background:var(--surface);
+  border-top:2px solid var(--rc);
+  border-bottom:1px solid var(--border);
+  padding:18px;margin-bottom:16px;
+  text-align:left;font-size:14px;color:var(--mid);line-height:1.7;
+  width:100%;
+}
+.rt-rule-card strong{color:var(--text)}
+.rt-example{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--rc);display:block;margin-top:8px}
+
+#player-waiting{text-align:center;padding:60px 20px 0}
+.wait-icon{font-size:56px;margin-bottom:12px;line-height:1}
+.wait-status{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.1em;margin-bottom:24px;text-transform:uppercase}
+
+.solo-header{width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px}
+.prog-bar{width:100%;height:1px;background:var(--raised);overflow:hidden}
+.prog-fill{height:100%;background:var(--rc);transition:width 0.3s ease}
+
+#end,#s-end-screen{text-align:center;padding:40px 20px 0}
+.end-grade{font-family:'Inter',sans-serif;font-weight:900;font-size:clamp(90px,22vw,130px);letter-spacing:-0.05em;line-height:1;color:var(--text);margin-bottom:4px}
+.end-grade span{color:var(--rc)}
+.end-sub{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:24px}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;width:100%;margin-bottom:1px;background:var(--border)}
+.stat-cell{background:var(--surface);padding:16px 8px;text-align:center}
+.stat-val{font-family:'Inter',sans-serif;font-weight:800;font-size:26px;color:var(--rc);display:block;margin-bottom:3px;letter-spacing:-0.03em}
+.stat-lbl{font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
+.ach-row{width:100%;display:flex;flex-direction:column;gap:1px;margin-bottom:1px;background:var(--border)}
+.ach{background:var(--surface);padding:14px 16px;display:flex;align-items:center;gap:12px}
+.ach-icon{font-size:20px;width:28px;text-align:center}
+.ach-body{text-align:left}
+.ach-name{font-size:14px;font-weight:700;color:var(--text)}
+.ach-desc{font-size:12px;color:var(--muted);margin-top:1px}
+.grammar-insight{width:100%;background:var(--surface);border-top:2px solid var(--rc);border-bottom:1px solid var(--border);padding:18px 16px;margin-bottom:1px;text-align:left}
+.gi-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.gi-text{font-size:13px;color:var(--mid);line-height:1.7}
+.podium-row{display:flex;align-items:center;padding:13px 16px;background:var(--surface);border-bottom:1px solid var(--border)}
+.podium-row.p1{border-left:3px solid var(--rc)}
+.podium-medal{font-size:18px;margin-right:10px;width:24px;text-align:center}
+.podium-name{flex:1;font-size:15px;font-weight:600}
+.podium-score{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--rc)}
+.end-message{font-size:14px;color:var(--mid);line-height:1.7;margin:16px 0 24px;max-width:360px;text-align:center}
+
+.boss-cloud{width:100%;min-height:52px;background:var(--rc-dim);border-bottom:1px solid var(--rc-border);padding:12px 14px;margin-top:1px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.cloud-word{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--rc);padding:3px 8px;background:rgba(254,44,85,0.08);border-radius:2px;animation:popIn 0.2s ease}
+.cloud-correct{color:var(--correct)!important;background:var(--correct-dim)!important}
+
+.flash{position:fixed;inset:0;pointer-events:none;z-index:900;opacity:0;transition:opacity 0.07s}
+.flash.green{background:rgba(37,211,102,0.08);opacity:1}
+.flash.red{background:rgba(255,48,64,0.08);opacity:1}
+.flash.boss{background:rgba(254,44,85,0.07);opacity:1}
+
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes roundArrive{
+  0%{opacity:0;transform:translateY(20px)}
+  60%{opacity:1;transform:translateY(-3px)}
+  100%{opacity:1;transform:translateY(0)}
+}
+@keyframes heroFlood{
+  0%{opacity:0}
+  100%{opacity:1}
+}
+@keyframes nameStrike{
+  0%{opacity:0;letter-spacing:-0.1em}
+  50%{opacity:1;letter-spacing:-0.04em}
+  100%{opacity:1;letter-spacing:-0.05em}
+}
+.anim-in{animation:slideUp 0.22s ease forwards}
+.rt-hero.arriving{animation:heroFlood 0.35s ease forwards}
+.rt-hero.arriving .rt-name{animation:nameStrike 0.4s ease 0.1s both}
+.rt-hero.arriving .rt-mechanic{animation:slideUp 0.3s ease 0.25s both}
+.rt-hero.arriving .rt-round-num{animation:slideUp 0.3s ease 0s both}
+.divider{width:100%;height:1px;background:var(--border);margin:0}
+.section-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;align-self:flex-start;padding:0 16px}
+.padded{padding:20px 16px}
+</style>
+</head>
+<body>
+
+<div class="flash" id="flash"></div>
+<div class="wrap">
+<!-- ════ HOST PASSWORD ════ -->
+  <div class="screen" id="host-pw" style="padding:48px 16px 0">
+    <div style="width:100%;margin-bottom:28px">
+      <span class="logo-eyebrow">Teacher access</span>
+      <div class="logo" style="font-size:clamp(36px,10vw,52px)">Host<br><em>a game</em></div>
+    </div>
+    <div style="width:100%">
+      <div class="field-label">Password</div>
+      <input type="password" id="hostPwInput" placeholder="Enter password"
+        autocomplete="new-password"
+        onkeydown="if(event.key==='Enter')checkHostPw()"
+        style="font-family:'Inter',sans-serif;letter-spacing:0.12em">
+      <div class="err" id="hostPwError"></div>
+      <button class="btn btn-accent" onclick="checkHostPw()">Continue →</button>
+    </div>
+  </div>
+
+  
+<!-- ════ HOST SETUP ════ -->
+  <div class="screen" id="host-setup" style="padding:32px 16px 0">
+    <div style="width:100%;margin-bottom:24px">
+      <span class="logo-eyebrow">Game settings</span>
+    </div>
+    <div style="width:100%">
+      <div class="field-label">Number of questions</div>
+      <select id="qCount">
+        <option value="10">10 — Quick</option>
+        <option value="20" selected>20 — Standard</option>
+        <option value="40">40 — Full game</option>
+      </select>
+      <div class="field-label">Time per question</div>
+      <select id="qTime">
+        <option value="8000">8 seconds</option>
+        <option value="12000" selected>12 seconds</option>
+        <option value="18000">18 seconds</option>
+      </select>
+    </div>
+    <button class="btn btn-accent" onclick="createRoom()" style="margin-top:8px">Create room →</button>
+    <button class="btn-ghost" onclick="goTo('host-pw')">← Back</button>
+  </div>
+
+  
+<!-- ════ HOST LOBBY ════ -->
+  <div class="screen" id="host-lobby" style="padding:20px 0 0">
+    <!-- PIN display -->
+    <div class="code-card">
+      <div class="code-label">Game PIN</div>
+      <div class="code-value" id="roomCodeDisplay">----</div>
+      <div class="code-sub">Students: open the game page and enter this PIN</div>
+    </div>
+
+    <!-- QR code -->
+    <div style="width:100%;background:var(--surface);border-bottom:1px solid var(--border);padding:20px 16px;display:flex;align-items:center;gap:16px;margin-bottom:1px">
+      <canvas id="qrCanvas" width="96" height="96" style="flex-shrink:0;image-rendering:pixelated;background:#fff;padding:4px"></canvas>
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Scan to join</div>
+        <div style="font-size:13px;color:var(--mid);line-height:1.5">Students can scan this QR code to open the game and join with the PIN pre-filled.</div>
+      </div>
+    </div>
+
+    <!-- Player list -->
+    <div style="width:100%;padding:16px 16px 8px">
+      <div class="plist-label">Players joined</div>
+      <div class="pchips" id="lobbyPlayers"><span style="font-size:13px;color:var(--muted);font-style:italic">Waiting for players…</span></div>
+    </div>
+
+    <div style="padding:0 16px;width:100%">
+      <button class="btn btn-accent" id="startBtn" onclick="startGame()" disabled>Start →</button>
+      <button class="btn-ghost" onclick="cancelRoom()">Cancel</button>
+    </div>
+  </div>
+
+  
+<!-- ════ HOST GAME ════ -->
+  <div class="screen" id="host-game" style="padding:0">
+    <div class="game-header">
+      <div class="round-tag" id="hostRoundTag">Round 1</div>
+      <div class="q-counter" id="hostQCounter">1 / 20</div>
+      <div class="ans-count" id="hostAnswersIn">0 answers</div>
+    </div>
+    <div class="timer-wrap"><div class="timer-fill" id="hostTimerBar" style="width:100%"></div></div>
+    <div class="post-card anim-in" id="hostQCard">
+      <div class="post-header">
+        <div class="post-avatar" id="hostAvatar">💬</div>
+        <div>
+          <div class="post-handle" id="hostHandle">@scene</div>
+        </div>
+        <div class="post-time" id="hostQCtxTime">now</div>
+      </div>
+      <div class="post-body">
+        <div class="post-context" id="hostQCtx"></div>
+        <div class="post-text" id="hostQText"></div>
+      </div>
+    </div>
+    <div class="host-opts" id="hostOpts"></div>
+    <div id="bossCloud" class="boss-cloud" style="display:none"></div>
+    <div class="divider"></div>
+    <div class="lb-label">Live scores</div>
+    <div class="lb-card"><div id="hostLeaderboard"></div></div>
+  </div>
+
+  
+<!-- ════ HOST END ════ -->
+  <div class="screen" id="end" style="text-align:center;padding:40px 16px 0">
+    <div class="end-grade">🏆</div>
+    <div class="end-sub" id="endSubtitle">Game over</div>
+    <div class="section-title">Final scores</div>
+    <div id="finalLeaderboard" style="width:100%;margin-bottom:24px"></div>
+    <div style="padding:0 16px;width:100%"><button class="btn btn-accent" onclick="location.reload()">Play again</button></div>
+  </div>
+
+  
+
+</div><!-- /wrap -->
+
+<script>
+"use strict";
+
+
+'use strict';
+
+// HTML escape
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+// ═══════════════════════
+// HOST PASSWORD + URL ROUTING
+// ═══════════════════════
+const HOST_PASSWORD = 'pp'; // Change this in one place
+
+// ═══════════════════════
+// QR CODE GENERATOR (no library — pure canvas)
+// ═══════════════════════
+// Minimal QR: encode URL as a data matrix drawn on canvas
+// Uses a tiny self-contained QR encoder (version 1, alphanumeric subset)
+// For classroom use — generates scannable QR for the join URL with PIN
+
+// ═══════════════════════
+// FIREBASE
+// ═══════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyDEkPv2FR8ktOvz1ERkUkBOb5uy5EnMABM",
+  authDomain: "signal-game-a17da.firebaseapp.com",
+  databaseURL: "https://signal-game-a17da-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "signal-game-a17da",
+  storageBucket: "signal-game-a17da.firebasestorage.app",
+  messagingSenderId: "402288961316",
+  appId: "1:402288961316:web:1f0f2d8143771842b4b5b1"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// Init called per-file
+
+// ═══════════════════════
+// ROUND CONFIG
+// ═══════════════════════
+const ROUND_CONFIG = {
+  1: { name:'Fill the Gap',       mechanic:'No clues. Read the situation.',    rc:'#FE2C55', dim:'rgba(254,44,85,0.12)',   border:'rgba(254,44,85,0.4)',   avatar:'📱', handle:'@situation' },
+  2: { name:'Perfect or Simple?', mechanic:'One sentence. Two choices.',        rc:'#FF9900', dim:'rgba(255,153,0,0.12)',   border:'rgba(255,153,0,0.4)',   avatar:'🔍', handle:'@classify'  },
+  3: { name:'Context Clash',      mechanic:'Both fit grammar. One fits life.',  rc:'#A259FF', dim:'rgba(162,89,255,0.12)', border:'rgba(162,89,255,0.4)',   avatar:'⚡', handle:'@context'   },
+  4: { name:'Justify It',         mechanic:'Right answer. Right reason.',       rc:'#25D366', dim:'rgba(37,211,102,0.12)', border:'rgba(37,211,102,0.4)',   avatar:'🧠', handle:'@justify'   },
+  5: { name:'No Labels',          mechanic:'No grammar. Just language.',        rc:'#00B4D8', dim:'rgba(0,180,216,0.12)',  border:'rgba(0,180,216,0.4)',    avatar:'💬', handle:'@real'      },
+  boss:{ name:'Boss',             mechanic:'Something different.',              rc:'#FE2C55', dim:'rgba(254,44,85,0.12)',  border:'rgba(254,44,85,0.4)',    avatar:'🔔', handle:'@boss'      },
+};
+
+function setRoundColor(r) {
+  const c = ROUND_CONFIG[r] || ROUND_CONFIG[1];
+  const root = document.documentElement;
+  root.style.setProperty('--rc', c.rc);
+  root.style.setProperty('--rc-dim', c.dim);
+  root.style.setProperty('--rc-border', c.border);
+  document.body.setAttribute('data-round', r);
+}
+
+function setPostAvatar(cardAvatarId, handleId, round) {
+  const c = ROUND_CONFIG[round] || ROUND_CONFIG[1];
+  const av = document.getElementById(cardAvatarId);
+  const hd = document.getElementById(handleId);
+  if (av) { av.textContent = c.avatar; av.style.background = c.dim; av.style.borderColor = c.border; }
+  if (hd) hd.textContent = c.handle;
+}
+
+// ═══════════════════════
+// QUESTION BANK — Gen Z/Alpha world, age 10/11
+// ═══════════════════════
+
+// ROUND 1: Fill the Gap — scene-based, no time-marker giveaways
+const R1_QUESTIONS = [
+  { context:"Zara opens TikTok and scrolls. She can't stop.", text:"She ___ on her phone for two hours — the battery is almost dead.", answer:"has been", options:["has been","was","is","went"] },
+  { context:"Breaking notification on everyone's screen.", text:"TikTok ___ the news — it's all anyone is talking about.", answer:"has broken", options:["has broken","broke","breaks","is breaking"] },
+  { context:"A teacher holds up a Chromebook with a cracked screen.", text:"Someone ___ this laptop — does anyone know what happened?", answer:"has broken", options:["has broken","broke","breaks","is breaking"] },
+  { context:"Mia's group chat is going wild. Nobody's replied to her.", text:"She ___ fifteen messages — still no reply.", answer:"has sent", options:["has sent","sent","sends","was sending"] },
+  { context:"Year 6 history. The teacher asks what students remember.", text:"We ___ about this last term — does anyone remember?", answer:"learned", options:["learned","have learned","learn","were learning"] },
+  { context:"Kai gets home. His mum looks worried at the door.", text:"Where ___ you ___? You were supposed to be back at four.", answer:"have / been", options:["have / been","did / go","were / going","are / being"] },
+  { context:"A notification pops up: 'New comment on your post.'", text:"Someone ___ your photo — they say it's fire.", answer:"liked", options:["liked","has liked","likes","is liking"] },
+  { context:"The Wi-Fi goes down mid-lesson. Everyone groans.", text:"The connection ___ — we'll have to restart everything.", answer:"has dropped", options:["has dropped","dropped","drops","was dropping"] },
+  { context:"Jada opens YouTube. The video she was watching is gone.", text:"The creator ___ the video — it's not there anymore.", answer:"has deleted", options:["has deleted","deleted","deletes","was deleting"] },
+  { context:"An old friend messages you out of nowhere.", text:"I ___ you ages — how are you?", answer:"haven't seen", options:["haven't seen","didn't see","don't see","wasn't seeing"] },
+  { context:"Leo holds up his phone. The screen is black.", text:"My phone ___  — I can't turn it on.", answer:"has died", options:["has died","died","dies","was dying"] },
+  { context:"The teacher checks the register. One seat is empty.", text:"Has anyone ___ where Sam is?", answer:"seen", options:["seen","saw","see","been seeing"] },
+  { context:"Everyone is using a new word that appeared last week.", text:"That word ___ everywhere on social media.", answer:"has spread", options:["has spread","spread","spreads","was spreading"] },
+  { context:"Priya shows her drawing to the class.", text:"She ___ on this all weekend — you can tell.", answer:"worked", options:["worked","has worked","works","was working"] },
+  { context:"A news alert flashes across the screen mid-lesson.", text:"Scientists ___ a new planet — it was on the news just now.", answer:"have discovered", options:["have discovered","discovered","discover","were discovering"] },
+];
+
+// ROUND 2: Binary — Present Perfect or Past Simple?
+const R2_QUESTIONS = [
+  { context:"", text:"She has been on TikTok for three hours.", answer:"pp" },
+  { context:"", text:"He lost his phone on the bus yesterday.", answer:"ps" },
+  { context:"", text:"I've never seen that meme before.", answer:"pp" },
+  { context:"", text:"They finished the game at midnight.", answer:"ps" },
+  { context:"", text:"Have you ever been to a concert?", answer:"pp" },
+  { context:"", text:"We watched that video in class on Monday.", answer:"ps" },
+  { context:"", text:"She's already replied to the message.", answer:"pp" },
+  { context:"", text:"He broke his arm in football training last week.", answer:"ps" },
+  { context:"", text:"I've just seen the notification.", answer:"pp" },
+  { context:"", text:"We made a TikTok in the park on Saturday.", answer:"ps" },
+  { context:"", text:"The app has crashed again.", answer:"pp" },
+  { context:"", text:"Did you enjoy the school trip last month?", answer:"ps" },
+  { context:"", text:"She has been learning guitar since January.", answer:"pp" },
+  { context:"", text:"I played Minecraft for six hours last Saturday.", answer:"ps" },
+  { context:"", text:"Has anyone seen the new Minecraft update?", answer:"pp" },
+];
+
+// ROUND 3: Context Clash — both grammatically correct, one fits the moment
+const R3_QUESTIONS = [
+  {
+    context:"Jayden drops his phone and picks it up. The screen is cracked. He shows everyone.",
+    text:"What does Jayden say?",
+    options:["I cracked my screen.","I've cracked my screen."],
+    answer:1,
+    explanation:"The cracked screen is right there, visible, relevant now — Present Perfect."
+  },
+  {
+    context:"Two friends talk about a game they both played when they were younger.",
+    text:"Which sentence fits this conversation?",
+    options:["I played Minecraft every day.","I've played Minecraft every day."],
+    answer:0,
+    explanation:"They're describing a closed past habit — that time is finished. Past Simple."
+  },
+  {
+    context:"A teacher asks: 'Why do you want to join the art club?'",
+    text:"Which answer fits?",
+    options:["I drew since I was five.","I've drawn since I was five."],
+    answer:1,
+    explanation:"The drawing continues up to now — 'since' with an unfinished period needs Present Perfect."
+  },
+  {
+    context:"Breaking notification on the school news app right now.",
+    text:"Which headline fits a live news notification?",
+    options:["The school won the regional competition.","The school has won the regional competition."],
+    answer:1,
+    explanation:"It just happened and is currently relevant — news in the present moment uses Present Perfect."
+  },
+  {
+    context:"Friends talking about a school trip from two years ago.",
+    text:"Which sentence fits this memory chat?",
+    options:["That trip was so good.","That trip has been so good."],
+    answer:0,
+    explanation:"Two years ago is a closed, finished time. Past Simple."
+  },
+  {
+    context:"Sofia's mum asks: 'Have you done your homework?' Sofia is still sitting at her desk, looking stressed.",
+    text:"What does Sofia say?",
+    options:["I didn't finish it yet.","I haven't finished it yet."],
+    answer:1,
+    explanation:"'Yet' signals an unfinished time up to now — Present Perfect."
+  },
+  {
+    context:"The app has just sent everyone a notification. Your phone buzzes.",
+    text:"Which sentence fits what you'd say to a friend right now?",
+    options:["Did you see the notification?","Have you seen the notification?"],
+    answer:1,
+    explanation:"It just happened, still current, still relevant — Present Perfect."
+  },
+  {
+    context:"Discussing a film that came out three years ago.",
+    text:"Which question fits?",
+    options:["Have you ever seen it?","Did you ever see it?"],
+    answer:0,
+    explanation:"'Ever' asking about life experience up to now = Present Perfect."
+  },
+  {
+    context:"A YouTuber posted a video 4 days ago. You're recommending it to a friend today.",
+    text:"Which sentence fits?",
+    options:["They posted an amazing video.","They've posted an amazing video."],
+    answer:1,
+    explanation:"It's recent and still up, still watchable, still relevant — Present Perfect."
+  },
+  {
+    context:"You're explaining why you look tired. You got no sleep because of a late-night gaming session.",
+    text:"What do you say?",
+    options:["I stayed up until 3am.","I've stayed up until 3am."],
+    answer:0,
+    explanation:"3am last night is a specific closed past time. Past Simple."
+  },
+];
+
+// ROUND 4: Justify It
+const R4_QUESTIONS = [
+  {
+    context:"Theo shows everyone his new trainers.", text:"He ___ a new pair of Nikes.", answer:"has bought",
+    options:["has bought","bought"],
+    justifyOptions:["He bought them a long time ago","The trainers are on his feet right now — still relevant","It was a specific moment in the past","I know exactly when he bought them"],
+    correctJustify:1,
+    explanation:"He's wearing them right now — the purchase is present and visible."
+  },
+  {
+    context:"Class is discussing a book they read in Year 5.", text:"We ___ that book in primary school.", answer:"read",
+    options:["read","have read"],
+    justifyOptions:["Primary school is a finished period of my life — that chapter is closed","The learning is still happening now","No specific time is mentioned so PP is needed","Primary school is recent enough to use Present Perfect"],
+    correctJustify:0,
+    explanation:"Primary school is a closed, finished chapter of life — Past Simple."
+  },
+  {
+    context:"Amara's bag is open. Her pencil case isn't there.", text:"I ___ my pencil case — it's not in my bag.", answer:"have lost",
+    options:["have lost","lost"],
+    justifyOptions:["I know exactly when I lost it","I found it later","It's still missing right now — that's the problem","It happened a very long time ago"],
+    correctJustify:2,
+    explanation:"Still missing, still matters — present consequence."
+  },
+  {
+    context:"Someone asks why you know so much about space.", text:"I ___ about space for years — I love it.", answer:"have been reading",
+    options:["have been reading","read"],
+    justifyOptions:["The reading stopped years ago — it's finished","I still read about it now — it's an ongoing interest","No specific time is named — it's indefinite","There's a specific date mentioned"],
+    correctJustify:1,
+    explanation:"The interest continues to now AND no specific time is named — both point to Present Perfect."
+  },
+  {
+    context:"A journalist asks a footballer: 'When did you score your first goal?'", text:"I ___ my first goal in 2019, in a local cup match.", answer:"scored",
+    options:["scored","have scored"],
+    justifyOptions:["The goal is still happening right now","2019 is a specific, closed past time — the event is done","The goal is still relevant because they're still a footballer","No specific time is mentioned so it could be PP"],
+    correctJustify:1,
+    explanation:"A specific year (2019) closes the time — Past Simple required even if the result feels relevant."
+  },
+  {
+    context:"Your friend asks if you've tried a new food place.", text:"___ you ever ___ Korean food?", answer:"Have / tried",
+    options:["Have / tried","Did / try"],
+    justifyOptions:["I'm asking about a specific day","I'm asking about their whole life experience up to now","I know they tried it last week","They mentioned it before"],
+    correctJustify:1,
+    explanation:"'Ever' = life experience up to now = Present Perfect."
+  },
+  {
+    context:"You arrive at school and see your friend's hand bandaged up.", text:"What ___ to your hand?", answer:"has happened",
+    options:["has happened","happened"],
+    justifyOptions:["The injury is old news — it happened long ago","The bandage is right there — the consequence is visible NOW","I know exactly when it happened — that makes it Past Simple","The news is recent but I know no specific time"],
+    correctJustify:1,
+    explanation:"Visible present consequence — the injury is still affecting them. That's what PP expresses."
+  },
+  {
+    context:"The teacher asks the class to remember something from a previous lesson.", text:"We ___ this last lesson — it was on the board.", answer:"did",
+    options:["did","have done"],
+    justifyOptions:["Last lesson is a specific closed past event","We're still doing it now","No specific time is mentioned","The result is relevant now"],
+    correctJustify:0,
+    explanation:"'Last lesson' is a specific finished time — Past Simple."
+  },
+];
+
+// ═══════════════════════
+// BOSS QUESTIONS — three types: court, detective, impossible
+// ═══════════════════════
+
+// Grammar Court: two answers shown, one wrong. Tap the wrong one, then tap why.
+const BOSS_COURT = [
+  {
+    bossType:"court",
+    scenario:"The teacher asks: 'Why are you late?' Two students answer.",
+    answers:[
+      { name:"Raya", text:"Sorry — I've missed the bus this morning." },
+      { name:"Luca", text:"Sorry — I missed the bus this morning." }
+    ],
+    wrongIdx:0,
+    whyOptions:[
+      "'this morning' is a specific finished time — Past Simple needed",
+      "Raya is being too polite",
+      "Present Perfect can never follow 'sorry'",
+      "Luca used the wrong subject"
+    ],
+    correctWhy:0,
+    explanation:"'This morning' names a specific closed past time. Present Perfect is incompatible."
+  },
+  {
+    bossType:"court",
+    scenario:"Two people describe the same broken laptop.",
+    answers:[
+      { name:"Zoe", text:"Someone has broken this laptop yesterday." },
+      { name:"Finn", text:"Someone broke this laptop yesterday." }
+    ],
+    wrongIdx:0,
+    whyOptions:[
+      "You cannot use 'has broken' — it sounds wrong",
+      "'Yesterday' is a specific finished time — Present Perfect is impossible with it",
+      "Finn forgot to use Present Perfect",
+      "The laptop is still broken so Zoe is right"
+    ],
+    correctWhy:1,
+    explanation:"Present Perfect is impossible with a specific finished time like 'yesterday'."
+  },
+  {
+    bossType:"court",
+    scenario:"A friend asks if you saw a film. Two replies.",
+    answers:[
+      { name:"Ali", text:"Yes, I saw it last Friday." },
+      { name:"Mia", text:"Yes, I've seen it last Friday." }
+    ],
+    wrongIdx:1,
+    whyOptions:[
+      "Mia should have used 'watched' not 'seen'",
+      "'Last Friday' closes the time — Present Perfect can't be used with it",
+      "Ali's answer is too short",
+      "Present Perfect is wrong after 'Yes'"
+    ],
+    correctWhy:1,
+    explanation:"'Last Friday' = specific closed past time. You must switch to Past Simple."
+  },
+  {
+    bossType:"court",
+    scenario:"Two students explain why they know a lot about climate change.",
+    answers:[
+      { name:"Priya", text:"I read about it for years — I'm really into it." },
+      { name:"Omar", text:"I've read about it for years — I'm really into it." }
+    ],
+    wrongIdx:0,
+    whyOptions:[
+      "Priya used the wrong verb",
+      "The interest continues to now — Past Simple cuts it off too early",
+      "Omar's sentence is too long",
+      "'For years' always needs Past Simple"
+    ],
+    correctWhy:1,
+    explanation:"The reading is ongoing up to the present — Past Simple closes it too early."
+  },
+];
+
+// Feed Detective: a sequence of posts. Students answer one question about the sequence.
+const BOSS_DETECTIVE = [
+  {
+    bossType:"detective",
+    intro:"Three posts. Same event — different moments.",
+    posts:[
+      { handle:"@jayden_g", time:"2 mins ago", text:"My phone has just died lol" },
+      { handle:"@jayden_g", time:"Yesterday", text:"I dropped my phone on the bus" },
+      { handle:"@jayden_g", time:"3 days ago", text:"Has anyone tried this new charging cable?" }
+    ],
+    question:"Which post shows Jayden reacting to something that JUST happened and is still relevant RIGHT NOW?",
+    options:["Post 1 — 'My phone has just died'","Post 2 — 'I dropped my phone'","Post 3 — 'Has anyone tried...'","All three — they're all relevant now"],
+    answer:0,
+    explanation:"'Has just died' = Present Perfect. The phone is dead right now. Post 2 used Past Simple because it happened yesterday — closed. Post 3 is a question about experience, not a reaction."
+  },
+  {
+    bossType:"detective",
+    intro:"Amara's feed. Something went wrong.",
+    posts:[
+      { handle:"@amara.does.art", time:"now", text:"I've lost my sketchbook — has anyone seen it??" },
+      { handle:"@amara.does.art", time:"Last week", text:"I finished my biggest drawing yet 🎨" },
+      { handle:"@amara.does.art", time:"2 years ago", text:"I started drawing when I was in Year 4" }
+    ],
+    question:"Which post uses Past Simple because the event happened at a SPECIFIC FINISHED time?",
+    options:["Post 1 — 'I've lost my sketchbook'","Post 2 — 'I finished my biggest drawing'","Post 3 — 'I started drawing'","Posts 2 and 3"],
+    answer:3,
+    explanation:"Both Post 2 ('last week') and Post 3 ('when I was in Year 4') name specific finished times — Past Simple. Post 1 uses Present Perfect because the sketchbook is STILL missing."
+  },
+  {
+    bossType:"detective",
+    intro:"Three people react to the same news story.",
+    posts:[
+      { handle:"@news_bot", time:"Breaking", text:"Scientists have discovered a new species of frog 🐸" },
+      { handle:"@kai_reacts", time:"4 mins ago", text:"Wait — did they discover this today??" },
+      { handle:"@ms_chen_sci", time:"3 mins ago", text:"We covered this topic in class last year" }
+    ],
+    question:"Why does @news_bot use Present Perfect but @ms_chen_sci uses Past Simple?",
+    options:[
+      "The news is recent with no specific time named; the class happened at a specific past time",
+      "News always uses Present Perfect; teachers always use Past Simple",
+      "@ms_chen_sci made a grammar mistake",
+      "Both should use Present Perfect — it's the same information"
+    ],
+    answer:0,
+    explanation:"@news_bot uses PP because the discovery is recent and no specific time is named. @ms_chen_sci uses PS because 'last year' is a specific finished time."
+  },
+  {
+    bossType:"detective",
+    intro:"Sofia's posts. Something changed.",
+    posts:[
+      { handle:"@sofia.creates", time:"5 days ago", text:"I've been working on this project all week 💻" },
+      { handle:"@sofia.creates", time:"2 days ago", text:"I submitted the project yesterday — finally done" },
+      { handle:"@sofia.creates", time:"now", text:"They loved it. I've passed! 🎉" }
+    ],
+    question:"Post 1 uses Present Perfect Progressive. Post 2 switches to Past Simple. Why?",
+    options:[
+      "Post 2 is less exciting so it uses Past Simple",
+      "'Yesterday' names a specific finished moment — the submission is closed, done",
+      "Past Simple is always used for school work",
+      "Sofia made a mistake in Post 1"
+    ],
+    answer:1,
+    explanation:"'Yesterday' closes the time. The submission is a finished event with a specific past time — Past Simple. Post 1's work was still ongoing at that point — Present Perfect Progressive."
+  },
+];
+
+// Impossible Sentence: three sentences, one cannot exist. Tap it.
+const BOSS_IMPOSSIBLE = [
+  {
+    bossType:"impossible",
+    prompt:"One of these sentences is IMPOSSIBLE in English. Which one?",
+    sentences:[
+      "I've been to Paris three times.",
+      "I've visited Paris last summer.",
+      "I visited Paris last summer."
+    ],
+    answer:1,
+    explanation:"'Last summer' is a specific finished time. Present Perfect is impossible with it. You must say 'I visited Paris last summer.'"
+  },
+  {
+    bossType:"impossible",
+    prompt:"One of these sentences is IMPOSSIBLE in English. Which one?",
+    sentences:[
+      "She has taught here since 2015.",
+      "She taught here since 2015.",
+      "She taught here in 2015."
+    ],
+    answer:1,
+    explanation:"'Since' points to an unfinished time period — it needs Present Perfect. 'She taught here since 2015' is impossible. 'She taught here in 2015' is fine because 'in 2015' closes the time."
+  },
+  {
+    bossType:"impossible",
+    prompt:"One of these sentences is IMPOSSIBLE in English. Which one?",
+    sentences:[
+      "Did you ever try spicy food?",
+      "Have you ever tried spicy food?",
+      "Have you tried spicy food before?"
+    ],
+    answer:0,
+    explanation:"'Ever' with life experience needs Present Perfect. 'Did you ever try' is grammatically possible but sounds unnatural and is typically considered incorrect in standard English — 'Have you ever tried' is the correct form."
+  },
+  {
+    bossType:"impossible",
+    prompt:"One of these sentences is IMPOSSIBLE in English. Which one?",
+    sentences:[
+      "He has worked here for five years.",
+      "He worked here for five years.",
+      "He has worked here since five years."
+    ],
+    answer:2,
+    explanation:"'Since' needs a point in time ('since 2019', 'since January'). 'Since five years' is impossible — you need 'for five years' or 'since five years ago'."
+  },
+];
+
+// Combined pool — boss questions drawn alternately from all three types
+const BOSS_POOL = [
+  ...BOSS_COURT.map(q=>({...q,round:'boss',type:'boss'})),
+  ...BOSS_DETECTIVE.map(q=>({...q,round:'boss',type:'boss'})),
+  ...BOSS_IMPOSSIBLE.map(q=>({...q,round:'boss',type:'boss'})),
+];
+
+// Round 5 — No Labels: pure communication, no tense names anywhere
+const R5_QUESTIONS = [
+  {
+    context:"Sam shows you his broken phone. Screen completely shattered.",
+    text:"What do you say?",
+    options:["What happened?","What has happened?","What did happen?","What happens?"],
+    answer:1,
+    explanation:"You're reacting to a visible situation right now — the broken phone is in front of you. 'What has happened?' fits because the consequence is present."
+  },
+  {
+    context:"You haven't seen your friend in weeks. You bump into them in town.",
+    text:"What's the most natural thing to say?",
+    options:["Where did you go?","I didn't see you for ages!","I haven't seen you in ages!","Where have you been going?"],
+    answer:2,
+    explanation:"The gap in contact continues up to right now — 'I haven't seen you in ages' is the natural choice."
+  },
+  {
+    context:"The teacher walks in. The classroom is chaotic. Something clearly happened.",
+    text:"What does the teacher say?",
+    options:["What happened here?","What has happened here?","What did happen here?","What was happened here?"],
+    answer:1,
+    explanation:"The mess is visible and present — the teacher is reacting to the current state. 'What has happened?' connects the past event to the present chaos."
+  },
+  {
+    context:"You ask your friend about a film. You want to know if they've seen it at any point in their life.",
+    text:"Which question do you ask?",
+    options:["Did you see that film?","Have you seen that film?","Were you seeing that film?","Do you see that film?"],
+    answer:1,
+    explanation:"You're asking about life experience up to now — 'Have you seen it?' is the natural choice."
+  },
+  {
+    context:"Your friend is crying. You don't know what happened.",
+    text:"What do you say first?",
+    options:["What happened?","What has happened?","What did you do?","What were you doing?"],
+    answer:0,
+    explanation:"When you're asking about a specific past event (what caused this), Past Simple is natural: 'What happened?' You want to know the event, not the current state."
+  },
+  {
+    context:"You're talking about your primary school. It was years ago.",
+    text:"Which sounds most natural?",
+    options:["I loved primary school.","I've loved primary school.","I love primary school.","I had loved primary school."],
+    answer:0,
+    explanation:"Primary school is a closed chapter of your life — Past Simple is the natural choice."
+  },
+  {
+    context:"A news notification pops up: something major just happened. No time is given.",
+    text:"Which headline fits perfectly?",
+    options:["Scientists discovered water on Mars.","Scientists have discovered water on Mars.","Scientists were discovering water on Mars.","Scientists discover water on Mars."],
+    answer:1,
+    explanation:"Breaking news with no specific time mentioned uses Present Perfect — it's recent and currently relevant."
+  },
+  {
+    context:"You're explaining a scar on your arm to someone who asks about it.",
+    text:"What do you say?",
+    options:["I broke my arm when I was seven.","I've broken my arm when I was seven.","I break my arm when I was seven.","I had broken my arm when I was seven."],
+    answer:0,
+    explanation:"'When I was seven' is a specific finished past time — Past Simple."
+  },
+  {
+    context:"Your friend looks exhausted. They clearly haven't slept.",
+    text:"What do you ask?",
+    options:["Did you sleep last night?","Have you slept?","Were you sleeping?","Do you sleep?"],
+    answer:1,
+    explanation:"You're asking about their current state — have they slept (up to now)? Present Perfect connects the past event to the present exhaustion."
+  },
+  {
+    context:"Your group finished a project together. It's done. Everyone's relieved.",
+    text:"What do you say?",
+    options:["We finally finished it!","We've finally finished it!","We finally finish it!","We had finally finished it!"],
+    answer:1,
+    explanation:"You're announcing a just-completed achievement that's currently relevant — everyone is relieved right now. Present Perfect."
+  },
+];
+
+const ROUND_RULES = {
+  1:`<strong>No grammar labels here.</strong> The context is a situation — read it and decide whether the time is closed or still open.<br><span class="rt-example">Present Perfect → the event still affects NOW.<br>Past Simple → specific, finished, done.</span>`,
+  2:`<strong>One sentence. One decision.</strong> Is it Present Perfect or Past Simple? No gap to fill — just understand what the sentence is doing.<br><span class="rt-example">Finished time? → Past Simple. Still relevant now? → Present Perfect.</span>`,
+  3:`<strong>Both sentences are grammatically correct.</strong> Only one fits the scene. Think like the person in the situation.<br><span class="rt-example">The tense isn't just a rule — it's a choice.</span>`,
+  4:`<strong>Fill the gap, then justify it.</strong> Right answer + wrong reason = fewer points. Show your thinking.<br><span class="rt-example">The reason IS the grammar.</span>`,
+  5:`<strong>No grammar labels. No tense names. No clues.</strong> Just communication. Choose what a real person would actually say.<br><span class="rt-example">If it sounds right and fits the situation — it's right.</span>`,
+};
+
+// ═══════════════════════
+// UTILS
+// ═══════════════════════
+function shuffle(arr) {
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function fuzzyMatch(input, correct) {
+  const norm = s => s.toLowerCase()
+    .replace(/[\u2018\u2019\u201c\u201d`']/g,"'")
+    .replace(/\bis\s+not\b/g,"isn't").replace(/\bare\s+not\b/g,"aren't")
+    .replace(/\bdo\s+not\b/g,"don't").replace(/\bdoes\s+not\b/g,"doesn't")
+    .replace(/\bhave\s+not\b/g,"haven't").replace(/\bhas\s+not\b/g,"hasn't")
+    .replace(/\bdid\s+not\b/g,"didn't")
+    .replace(/\s+/g,' ').trim();
+  const ni=norm(input),nc=norm(correct);
+  return ni===nc || ni.replace(/[.,!?]/g,'')===nc.replace(/[.,!?]/g,'');
+}
+
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function flashScreen(type) {
+  const el=document.getElementById('flash');
+  el.className='flash '+type;
+  setTimeout(()=>{el.className='flash';},400);
+}
+
+// ═══════════════════════
+// STATE
+// ═══════════════════════
+let MODE=null,roomCode=null,playerId=null,playerName=null;
+let queuedQuestions=[],currentQIndex=0,totalQuestions=20,questionDuration=12000;
+let hostTimerInterval=null,playerTimerInterval=null;
+let playerAnswered=false,playerJustified=false,playerStreak=0,playerScore=0;
+let answersListener=null,stateListener=null,playerScoreListener=null,playerStatusListener=null;
+let questionResolved=false,currentStartTime=0,currentQ=null;
+
+// ═══════════════════════
+// QUEUE BUILDER
+// ═══════════════════════
+function buildQueue(total) {
+  const pools={1:shuffle(R1_QUESTIONS),2:shuffle(R2_QUESTIONS),3:shuffle(R3_QUESTIONS),4:shuffle(R4_QUESTIONS),5:shuffle(R5_QUESTIONS)};
+  const bossPool=shuffle(BOSS_POOL);
+  const ptrs={1:0,2:0,3:0,4:0,5:0};
+  // Cycle through all 5 rounds for regular questions
+  const order=[1,2,3,4,5,1,2,3,4];
+  let bossIdx=0,regCount=0,queue=[];
+  for(let i=0;i<total;i++){
+    if((i+1)%5===0){
+      const bq=bossPool[bossIdx%bossPool.length];
+      queue.push({...bq,round:'boss',level:99});
+      bossIdx++;
+    } else {
+      const r=order[regCount%order.length];
+      const pool=pools[r];
+      const q=pool[ptrs[r]%pool.length];
+      const typeMap={2:'binary',3:'clash',4:'justify',5:'nolabels'};
+      const type=typeMap[r]||'mcq';
+      queue.push({...q,type,round:r,level:r});
+      ptrs[r]++;regCount++;
+    }
+  }
+  return queue;
+}
+
+// ═══════════════════════
+// HOST — CREATE ROOM
+// ═══════════════════════
+// ═══════════════════════
+// HOST — GAME
+// ═══════════════════════
+// ═══════════════════════
+// PLAYER — JOIN
+// ═══════════════════════
+// ═══════════════════════
+// PLAYER — LISTEN
+// ═══════════════════════
+// ═══════════════════════
+// BOSS RENDER FUNCTIONS
+// ═══════════════════════
+
+// Clean up dynamically inserted boss elements between questions
+// ═══════════════════════
+// SOLO
+// ═══════════════════════
+const SOLO_ROUNDS=[
+  {id:1,pool:R1_QUESTIONS,type:'mcq'},
+  {id:2,pool:R2_QUESTIONS,type:'binary'},
+  {id:3,pool:R3_QUESTIONS,type:'clash'},
+  {id:4,pool:R4_QUESTIONS,type:'justify'},
+  {id:5,pool:R5_QUESTIONS,type:'nolabels'},
+];
+
+let solo={
+  round:0,qIndex:0,lives:3,score:0,streak:0,bestStreak:0,totalCorrect:0,
+  answered:false,justified:false,timer:null,timerPct:100,
+  roundsDone:0,pool:[],justifyPending:false,justifyCorrectIdx:-1,
+  justifyAnswered:false,questionsAttempted:0,clashCorrect:0,justifyBonuses:0,
+};
+
+function startSolo(){
+  solo={round:0,qIndex:0,lives:3,score:0,streak:0,bestStreak:0,totalCorrect:0,
+    answered:false,justified:false,timer:null,timerPct:100,
+    roundsDone:0,pool:[],justifyPending:false,justifyCorrectIdx:-1,
+    justifyAnswered:false,questionsAttempted:0,clashCorrect:0,justifyBonuses:0};
+  sShowRoundTransition();
+}
+
+function sShowRoundTransition(){
+  const r=SOLO_ROUNDS[solo.round];
+  setRoundColor(r.id);
+  const cfg=ROUND_CONFIG[r.id];
+  document.getElementById('s-roundNum').textContent=`Round 0${r.id} / 04`;
+  const nameParts=cfg.name.split(' ');
+  document.getElementById('s-roundName').innerHTML=nameParts.length>1?`${nameParts[0]} <span>${nameParts.slice(1).join(' ')}</span>`:`<span>${cfg.name}</span>`;
+  document.getElementById('s-roundMechanic').textContent=cfg.mechanic;
+  document.getElementById('s-roundRule').innerHTML=ROUND_RULES[r.id];
+  goTo('s-round-screen');
+  // Trigger entrance animation
+  requestAnimationFrame(()=>{
+    const hero=document.getElementById('s-roundHero');
+    if(hero){hero.classList.remove('arriving');requestAnimationFrame(()=>hero.classList.add('arriving'));}
+  });
+}
+
+function sBeginRound(){
+  const r=SOLO_ROUNDS[solo.round];
+  solo.pool=shuffle(r.pool);solo.qIndex=0;solo.answered=false;solo.justified=false;
+  goTo('s-game-screen');sRenderQ();
+}
+
+function updateBars(){
+  for(let i=0;i<3;i++){
+    const el=document.getElementById('s-bar'+i);
+    if(el)el.className='bar b'+(i+1)+(i>=solo.lives?' dead':'');
+  }
+}
+
+function sRenderQ(){
+  const r=SOLO_ROUNDS[solo.round];const q=solo.pool[solo.qIndex];
+  setRoundColor(r.id);
+  const cfg=ROUND_CONFIG[r.id];
+  document.getElementById('s-roundIndicator').textContent=`Round ${r.id} / 4`;
+  document.getElementById('s-roundLabel').textContent=cfg.name;
+  document.getElementById('s-scoreDisplay').textContent=solo.score;
+  document.getElementById('s-streakNum').textContent=solo.streak;
+  updateBars();
+  document.getElementById('s-progressFill').style.width=((solo.qIndex/solo.pool.length)*100)+'%';
+  document.getElementById('s-qCtx').textContent=q.context||'';
+  document.getElementById('s-feedbackRow').textContent='';
+  document.getElementById('s-feedbackRow').style.color='';
+  // Apply round colour to question card border
+  const qcard=document.getElementById('s-qcard');
+  qcard.style.borderTop='2px solid var(--rc)';
+  qcard.style.borderLeft='2px solid var(--rc)';
+  // post avatar
+  setPostAvatar('s-avatar','s-handle',r.id);
+  const oa=document.getElementById('s-optionsArea');oa.innerHTML='';
+  solo.answered=false;solo.justified=false;solo.justifyPending=false;solo.justifyAnswered=false;
+
+  if(r.type==='binary'){
+    document.getElementById('s-qText').innerHTML=`<strong>"${q.text}"</strong>`;
+    const sa=document.createElement('div');sa.className='swipe-area';
+    sa.innerHTML=`<button class="swipe-btn swipe-pp" id="s-swipePP" onclick="sSoloBinary('pp',this,'${q.answer}')">Present<br>Perfect</button>
+      <button class="swipe-btn swipe-ps" id="s-swipePS" onclick="sSoloBinary('ps',this,'${q.answer}')">Past<br>Simple</button>`;
+    oa.appendChild(sa);
+  } else if(r.type==='clash'){
+    document.getElementById('s-qText').innerHTML=
+      `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:8px;letter-spacing:0.1em">Which fits the scene?</span>${q.context}`;
+    const grid=document.createElement('div');grid.className='p-opts';grid.style.gridTemplateColumns='1fr';
+    (q.options||[]).forEach((o,i)=>{
+      const btn=document.createElement('button');btn.className='p-opt';
+      btn.style.textAlign='left';btn.style.fontSize='14px';btn.textContent=o;
+      btn.onclick=()=>sSoloClash(i,btn,q.answer,q.explanation||'');
+      grid.appendChild(btn);
+    });oa.appendChild(grid);
+  } else if(r.type==='nolabels'){
+    document.getElementById('s-qText').innerHTML=
+      (q.text||'');
+    const grid=document.createElement('div');grid.className='p-opts';
+    grid.style.gridTemplateColumns='1fr';
+    shuffle(q.options||[]).forEach(o=>{
+      const btn=document.createElement('button');btn.className='p-opt';
+      btn.style.cssText='text-align:left;font-size:15px;padding:18px 16px';
+      btn.textContent=o;
+      btn.onclick=()=>sSoloMCQ(o,btn,q.answer);
+      grid.appendChild(btn);
+    });oa.appendChild(grid);
+  } else if(r.type==='justify'){
+    document.getElementById('s-qText').innerHTML=
+      (q.text||'').replace('___',`<span id="s-blankSpan" style="display:inline-block;min-width:100px;border-bottom:2.5px solid var(--rc);color:var(--rc);text-align:center;padding:0 6px;vertical-align:bottom">___</span>`);
+    const grid=document.createElement('div');grid.className='p-opts';
+    shuffle(q.options||[]).forEach(o=>{
+      const btn=document.createElement('button');btn.className='p-opt';btn.textContent=o;
+      btn.onclick=()=>sSoloJustifyAnswer(o,btn,q);grid.appendChild(btn);
+    });oa.appendChild(grid);
+    solo.justifyCorrectIdx=q.correctJustify;solo.justifyOptions=q.justifyOptions||[];solo.justifyExplanation=q.explanation||'';
+  } else {
+    document.getElementById('s-qText').innerHTML=
+      (q.text||'').replace('___',`<span id="s-blankSpan" style="display:inline-block;min-width:100px;border-bottom:2.5px solid var(--rc);color:var(--rc);text-align:center;padding:0 6px;vertical-align:bottom;font-style:italic">___</span>`);
+    const grid=document.createElement('div');grid.className='p-opts';
+    shuffle(q.options||[]).forEach(o=>{
+      const btn=document.createElement('button');btn.className='p-opt';btn.textContent=o;
+      btn.onclick=()=>sSoloMCQ(o,btn,q.answer);grid.appendChild(btn);
+    });oa.appendChild(grid);
+  }
+
+  clearInterval(solo.timer);solo.timerPct=100;
+  const bar=document.getElementById('s-timerBar');bar.style.width='100%';bar.style.background='var(--rc)';
+  const timePerQ=r.type==='justify'?18000:r.type==='clash'?15000:12000;
+  solo.timer=setInterval(()=>{
+    solo.timerPct-=(100/(timePerQ/100));
+    bar.style.width=Math.max(0,solo.timerPct)+'%';
+    if(solo.timerPct<=25)bar.style.background='var(--wrong)';
+    if(solo.timerPct<=0){clearInterval(solo.timer);sSoloTimeout(q);}
+  },100);
+}
+
+function sSoloMCQ(chosen,btn,correct){
+  if(solo.answered)return;solo.answered=true;clearInterval(solo.timer);
+  const ok=chosen===correct;
+  const blank=document.getElementById('s-blankSpan');
+  if(blank){blank.textContent=ok?chosen:correct;blank.style.color=ok?'var(--correct)':'var(--wrong)';blank.style.borderBottomColor=ok?'var(--correct)':'var(--wrong)';blank.style.fontStyle='normal';}
+  document.querySelectorAll('#s-optionsArea .p-opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent.trim()===correct){b.style.background='var(--correct-dim)';b.style.borderColor='var(--correct-border)';b.style.color='var(--correct)';}
+    else if(b.textContent.trim()===chosen&&!ok){b.style.background='var(--wrong-dim)';b.style.borderColor='var(--wrong-border)';b.style.color='var(--wrong)';}
+  });
+  sHandleResult(ok,'');
+}
+
+function sSoloBinary(choice,btn,correct){
+  if(solo.answered)return;solo.answered=true;clearInterval(solo.timer);
+  const ok=choice===correct;
+  document.getElementById('s-swipePP').disabled=true;document.getElementById('s-swipePS').disabled=true;
+  btn.className=btn.className.split(' ').filter(c=>c!=='swipe-pp'&&c!=='swipe-ps').join(' ');
+  btn.classList.add(ok?'chosen-correct':'chosen-wrong');
+  const cb=document.getElementById(correct==='pp'?'s-swipePP':'s-swipePS');
+  if(!ok&&cb)cb.classList.add('reveal-correct');
+  sHandleResult(ok,'');
+}
+
+function sSoloClash(idx,btn,correct,explanation){
+  if(solo.answered)return;solo.answered=true;clearInterval(solo.timer);
+  const ok=idx===correct;
+  document.querySelectorAll('#s-optionsArea .p-opt').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===correct){b.style.background='var(--correct-dim)';b.style.borderColor='var(--correct-border)';b.style.color='var(--correct)';}
+    else if(i===idx&&!ok){b.style.background='var(--wrong-dim)';b.style.borderColor='var(--wrong-border)';b.style.color='var(--wrong)';}
+  });
+  if(ok)solo.clashCorrect++;
+  sHandleResult(ok,explanation);
+}
+
+function sSoloJustifyAnswer(chosen,btn,q){
+  if(solo.answered)return;solo.answered=true;clearInterval(solo.timer);
+  const ok=chosen===q.answer;
+  const blank=document.getElementById('s-blankSpan');
+  if(blank){blank.textContent=ok?chosen:q.answer;blank.style.color=ok?'var(--correct)':'var(--wrong)';blank.style.borderBottomColor=ok?'var(--correct)':'var(--wrong)';blank.style.fontStyle='normal';}
+  document.querySelectorAll('#s-optionsArea .p-opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent.trim()===q.answer){b.style.background='var(--correct-dim)';b.style.borderColor='var(--correct-border)';b.style.color='var(--correct)';}
+    else if(b.textContent.trim()===chosen&&!ok){b.style.background='var(--wrong-dim)';b.style.borderColor='var(--wrong-border)';b.style.color='var(--wrong)';}
+  });
+  if(ok){
+    solo.justifyPending=true;
+    const fb=document.getElementById('s-feedbackRow');
+    fb.textContent='✓ Correct — now choose your reason (+5)';fb.style.color='var(--correct)';
+    const jw=document.createElement('div');jw.style.cssText='margin-top:12px;display:flex;flex-direction:column;gap:8px;';
+    const jLabel=document.createElement('div');jLabel.className='justify-label';jLabel.textContent='Why? Choose a reason:';jw.appendChild(jLabel);
+    const jtiles=document.createElement('div');jtiles.className='justify-tiles';
+    (q.justifyOptions||[]).forEach((j,i)=>{
+      const tile=document.createElement('div');tile.className='j-tile';tile.textContent=j;
+      tile.onclick=()=>{
+        if(solo.justifyAnswered)return;solo.justifyAnswered=true;
+        const isJ=i===q.correctJustify;
+        tile.classList.add(isJ?'j-correct':'j-wrong');
+        document.querySelectorAll('.j-tile').forEach(t=>t.classList.add('locked'));
+        if(isJ){fb.textContent='✓ Right reason too — +5 bonus!';solo.score+=5;solo.justifyBonuses++;document.getElementById('s-scoreDisplay').textContent=solo.score;}
+        else{fb.textContent=`✗ Right answer, wrong reason. It was: ${q.justifyOptions[q.correctJustify]}`;fb.style.color='var(--wrong)';}
+        setTimeout(()=>sNextQ(),1800);
+      };jtiles.appendChild(tile);
+    });jw.appendChild(jtiles);document.getElementById('s-optionsArea').appendChild(jw);
+  } else {sHandleResult(false,q.explanation||'');}
+}
+
+function sHandleResult(ok,explanation){
+  solo.questionsAttempted++;
+  const fb=document.getElementById('s-feedbackRow');
+  if(ok){
+    solo.streak++;solo.totalCorrect++;
+    if(solo.streak>solo.bestStreak)solo.bestStreak=solo.streak;
+    const pts=10+Math.min((solo.streak>1?(solo.streak-1)*2:0),10);
+    solo.score+=pts;
+    document.getElementById('s-scoreDisplay').textContent=solo.score;
+    document.getElementById('s-streakNum').textContent=solo.streak;
+    fb.textContent=solo.streak>2?`✓ +${pts} (×${solo.streak} streak)`:`✓ +${pts}`;
+    fb.style.color='var(--correct)';
+    flashScreen('green');
+    if(!solo.justifyPending)setTimeout(()=>sNextQ(),900);
+  } else {
+    solo.streak=0;document.getElementById('s-streakNum').textContent=0;
+    fb.textContent=explanation?`✗ ${explanation}`:'✗ Wrong';
+    fb.style.color='var(--wrong)';
+    flashScreen('red');sLoseLife();setTimeout(()=>sNextQ(),2200);
+  }
+}
+
+function sSoloTimeout(q){
+  if(solo.answered)return;solo.answered=true;solo.questionsAttempted++;
+  const fb=document.getElementById('s-feedbackRow');
+  fb.textContent=`Time's up — answer: ${typeof q.answer==='number'?(q.options||[])[q.answer]:q.answer}`;
+  fb.style.color='var(--wrong)';flashScreen('red');sLoseLife();setTimeout(()=>sNextQ(),2000);
+}
+
+function sLoseLife(){
+  if(solo.lives<=0)return;solo.lives--;
+  updateBars();
+  if(solo.lives<=0){clearInterval(solo.timer);solo.roundsDone=solo.round+1;setTimeout(()=>sShowEnd(),2400);}
+}
+
+function sNextQ(){
+  if(solo.lives<=0)return;
+  if(solo.justifyPending&&!solo.justifyAnswered)return;
+  solo.qIndex++;
+  if(solo.qIndex>=solo.pool.length){
+    solo.roundsDone=solo.round+1;solo.round++;
+    if(solo.round>=SOLO_ROUNDS.length){sShowEnd();return;}
+    sShowRoundTransition();
+  } else {sRenderQ();}
+}
+
+function sShowEnd(){
+  clearInterval(solo.timer);
+  const total=solo.questionsAttempted||1;
+  const pct=Math.round((solo.totalCorrect/total)*100);
+  let grade,gColor,label,message;
+  if(pct>=90){grade='S';gColor='var(--correct)';label='Fluent';message="You're not just using the right form — you understand what each tense is doing. That's the real thing.";}
+  else if(pct>=75){grade='A';gColor='var(--r1)';label='Strong';message="Solid. The meaning is clicking. Push for the justify bonuses next time — that's where real understanding shows.";}
+  else if(pct>=60){grade='B';gColor='var(--r2)';label='Getting it';message="You have the basics. The Context Clash and Justify rounds are where you can still grow.";}
+  else if(pct>=45){grade='C';gColor='var(--r3)';label='Developing';message="Some of this is landing. Try Round 3 — it forces the reasoning you need.";}
+  else{grade='D';gColor='var(--wrong)';label='Keep going';message="Present Perfect vs Past Simple is genuinely hard. Focus on what the tense does, not what words are in the sentence.";}
+
+  document.getElementById('s-endGrade').textContent=grade;
+  document.getElementById('s-endGrade').style.color=gColor;
+  document.getElementById('s-endLabel').textContent=`${label} · ${pct}%`;
+  document.getElementById('s-finalScore').textContent=solo.score;
+  document.getElementById('s-finalCorrect').textContent=solo.totalCorrect;
+  document.getElementById('s-finalStreak').textContent=solo.bestStreak;
+  document.getElementById('s-finalRounds').textContent=solo.roundsDone;
+
+  const achs=[];
+  if(solo.bestStreak>=5)achs.push({icon:'🔥',name:'On a Run',desc:`${solo.bestStreak} correct in a row`});
+  if(solo.justifyBonuses>=3)achs.push({icon:'🧠',name:'Real Understanding',desc:'Justified correctly 3+ times'});
+  if(solo.clashCorrect>=4)achs.push({icon:'🔍',name:'Context Reader',desc:'4+ Context Clash questions correct'});
+  if(solo.lives===3&&solo.roundsDone>=2)achs.push({icon:'🛡️',name:'Untouchable',desc:'2+ rounds without losing a life'});
+  if(pct>=90)achs.push({icon:'📡',name:'Full Signal',desc:'90%+ correct'});
+  if(achs.length===0)achs.push({icon:'⚡',name:'First Attempt',desc:'Complete a full run for more achievements'});
+  document.getElementById('s-achievements').innerHTML=achs.map(a=>
+    `<div class="ach"><div class="ach-icon">${a.icon}</div><div class="ach-body"><div class="ach-name">${a.name}</div><div class="ach-desc">${a.desc}</div></div></div>`
+  ).join('');
+
+  const insightEl=document.getElementById('s-grammarInsight');
+  const insightText=document.getElementById('s-insightText');
+  if(solo.roundsDone>=2){
+    insightEl.style.display='block';
+    if(solo.justifyBonuses>0){insightText.textContent=`You justified ${solo.justifyBonuses} answer${solo.justifyBonuses>1?'s':''} correctly — you're not just recognising the right form, you can explain why.`;}
+    else if(solo.clashCorrect>=3){insightText.textContent=`You chose the right sentence for the scene ${solo.clashCorrect} times. Tense isn't just a grammar rule — it's a choice the speaker makes based on meaning.`;}
+    else{insightText.textContent=`Present Perfect = the past event still matters now. Past Simple = it's finished, done. When in doubt: is the consequence still here? If yes, probably Present Perfect.`;}
+  }
+  document.getElementById('s-endMessage').textContent=message;
+  goTo('s-end-screen');
+}
+
+
+// ═══════════════════════
+// HOST FUNCTIONS
+// ═══════════════════════
+
+function createRoom() {
+  totalQuestions=parseInt(document.getElementById('qCount').value);
+  questionDuration=parseInt(document.getElementById('qTime').value);
+  roomCode=Math.random().toString(36).substring(2,6).toUpperCase();
+  MODE='host';
+  queuedQuestions=buildQueue(totalQuestions);
+  db.ref('rooms/'+roomCode).set({status:'lobby',players:{},currentQ:null,totalQ:totalQuestions,duration:questionDuration});
+  db.ref('rooms/'+roomCode).onDisconnect().remove();
+  document.getElementById('roomCodeDisplay').textContent=roomCode;
+  // Generate QR code for the lobby
+  generateLobbyQR(roomCode);
+  goTo('host-lobby');
+  db.ref('rooms/'+roomCode+'/players').on('value',snap=>{
+    const players=snap.val()||{};
+    renderLobbyPlayers(players);
+    const btn=document.getElementById('startBtn');
+    btn.disabled=Object.keys(players).length===0;
+  });
+}
+
+
+
+function renderLobbyPlayers(players) {
+  const el=document.getElementById('lobbyPlayers');
+  const list=Object.values(players);
+  if(!list.length){el.innerHTML='<span style="font-size:13px;color:var(--muted);font-style:italic">Waiting for players…</span>';return;}
+  el.innerHTML=list.map(p=>`<div class="pchip">${esc(p.name)}</div>`).join('');
+}
+
+
+
+function cancelRoom(){if(roomCode)db.ref('rooms/'+roomCode).remove();goTo('host-setup');}
+
+
+
+function startGame(){
+  db.ref('rooms/'+roomCode+'/status').set('playing');
+  goTo('host-game');
+  pushQuestion(0);
+}
+
+
+
+function pushQuestion(index) {
+  if(index>=queuedQuestions.length){endGame();return;}
+  const q=queuedQuestions[index];
+  currentQIndex=index;
+  questionResolved=false;
+  setRoundColor(q.round);
+
+  const cfg=ROUND_CONFIG[q.round]||ROUND_CONFIG[1];
+  // Flash round change if round changed
+  const prevRound = parseInt(document.getElementById('hostRoundTag').dataset.round||'0');
+  const newRound = q.round;
+  document.getElementById('hostRoundTag').textContent=q.round==='boss'?'🔔 Boss':`Round ${q.round} — ${cfg.name}`;
+  document.getElementById('hostRoundTag').dataset.round=q.round;
+  if(prevRound && prevRound !== newRound && newRound !== 'boss'){
+    document.getElementById('hostRoundTag').style.fontWeight='900';
+    document.getElementById('hostRoundTag').style.fontSize='13px';
+    setTimeout(()=>{document.getElementById('hostRoundTag').style.fontWeight='';document.getElementById('hostRoundTag').style.fontSize='';},1200);
+  }
+  document.getElementById('hostQCounter').textContent=`${index+1} / ${totalQuestions}`;
+  document.getElementById('hostAnswersIn').textContent='0 answers';
+  document.getElementById('hostAvatar').textContent=cfg.avatar;
+  document.getElementById('hostAvatar').style.background=cfg.dim;
+  document.getElementById('hostAvatar').style.borderColor=cfg.border;
+  document.getElementById('hostHandle').textContent=cfg.handle;
+  document.getElementById('hostQCtx').textContent=q.context||'';
+  document.getElementById('bossCloud').style.display='none';
+
+  if(q.type==='binary'){
+    document.getElementById('hostQText').innerHTML=`<em style="font-size:13px;color:var(--muted);font-style:normal;font-family:'JetBrains Mono',monospace;letter-spacing:0.06em">Students classify:</em><br><br>"${q.text}"`;
+  } else if(q.type==='clash'){
+    document.getElementById('hostQText').innerHTML=`${q.context}<br><br><span style="font-size:13px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.06em">Choose the sentence that fits:</span>`;
+  } else {
+    document.getElementById('hostQText').innerHTML=(q.text||'').replace('___',`<span class="post-blank" id="hostBlank">___</span>`);
+  }
+
+  const optsEl=document.getElementById('hostOpts');
+  if(q.type='boss'){
+    let bossLabel = q.bossType==='court' ? '⚖️ Grammar Court — who is wrong?' :
+                    q.bossType==='detective' ? '🔍 Feed Detective — read the posts' :
+                    q.bossType==='impossible' ? '🚫 Impossible Sentence — find it' : '🔔 Boss';
+    optsEl.innerHTML=`<div style="grid-column:1/-1;background:var(--rbd);border:1.5px solid var(--rbb);border-radius:3px;padding:16px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--rb)">
+      ${bossLabel} · 30 points${q.hint?`<br><span style="color:var(--muted);font-size:10px;letter-spacing:0;display:block;margin-top:4px;font-style:italic">${q.hint}</span>`:''}
+    </div>`;
+    document.getElementById('bossCloud').style.display='flex';
+    document.getElementById('bossCloud').innerHTML='';
+  } else if(q.type==='binary'){
+    optsEl.innerHTML=`
+      <div class="host-opt" style="border-color:var(--r1b);color:var(--r1);background:var(--r1d)" id="opt-pp">Present Perfect<span class="opt-count" id="count-pp"></span></div>
+      <div class="host-opt" style="border-color:var(--r2b);color:var(--r2);background:var(--r2d)" id="opt-ps">Past Simple<span class="opt-count" id="count-ps"></span></div>`;
+  } else if(q.type==='clash'){
+    optsEl.innerHTML=(q.options||[]).map((o,i)=>
+      `<div class="host-opt" id="opt-clash-${i}" style="font-size:13px;text-align:left">${o}<span class="opt-count" id="count-clash-${i}"></span></div>`
+    ).join('');
+  } else {
+    optsEl.innerHTML=shuffle(q.options||[]).map(o=>{
+      const key=o.replace(/\s/g,'_').replace(/['/]/g,'');
+      return `<div class="host-opt" id="opt-${key}">${o}<span class="opt-count" id="count-${key}"></span></div>`;
+    }).join('');
+  }
+
+  const startTime=Date.now();
+  currentStartTime=startTime;
+  const fbQ={text:q.text||q.context,context:q.context||'',type:q.type,round:q.round,startTime,index};
+  if(q.type==='boss'){fbQ.answer=q.answer;fbQ.hint=q.hint||null;fbQ.bossType=q.bossType||'complete';}
+  else if(q.type==='binary'){fbQ.answer=q.answer;}
+  else if(q.type==='clash'){fbQ.options=q.options;fbQ.answer=q.answer;}
+  else if(q.type==='justify'){fbQ.options=shuffle(q.options);fbQ.answer=q.answer;fbQ.justifyOptions=q.justifyOptions;fbQ.correctJustify=q.correctJustify;fbQ.explanation=q.explanation||'';}
+  else{fbQ.options=shuffle(q.options);fbQ.answer=q.answer;}
+
+  if(answersListener){db.ref('rooms/'+roomCode+'/answers').off('value',answersListener);answersListener=null;}
+  db.ref('rooms/'+roomCode+'/answers').remove().then(()=>{
+    answersListener=db.ref('rooms/'+roomCode+'/answers').on('value',snap=>{
+      const answers=snap.val()||{};
+      const count=Object.keys(answers).length;
+      document.getElementById('hostAnswersIn').textContent=`${count} answer${count!==1?'s':''}`;
+      if(q.type==='binary'){
+        const ppC=Object.values(answers).filter(a=>a.answer==='pp').length;
+        const psC=Object.values(answers).filter(a=>a.answer==='ps').length;
+        const ppEl=document.getElementById('count-pp');const psEl=document.getElementById('count-ps');
+        if(ppEl)ppEl.textContent=ppC||'';if(psEl)psEl.textContent=psC||'';
+      } else if(q.type==='boss'){
+        const cloud=document.getElementById('bossCloud');
+        if(cloud)cloud.innerHTML=Object.values(answers).map(a=>`<span class="cloud-word ${fuzzyMatch(a.answer,q.answer)?'cloud-correct':''}">${esc(a.answer)}</span>`).join('');
+      } else if(q.type==='clash'){
+        [0,1].forEach(i=>{const c=Object.values(answers).filter(a=>a.answer===i).length;const el=document.getElementById(`count-clash-${i}`);if(el)el.textContent=c||'';});
+      } else {
+        const tally={};Object.values(answers).forEach(a=>{tally[a.answer]=(tally[a.answer]||0)+1;});
+        (q.options||[]).forEach(o=>{const key=o.replace(/\s/g,'_').replace(/['/]/g,'');const el=document.getElementById('count-'+key);if(el)el.textContent=tally[o]||'';});
+      }
+    });
+    db.ref('rooms/'+roomCode+'/currentQ').set(fbQ);
+    startHostTimer(startTime,questionDuration,q);
+  });
+}
+
+
+
+function startHostTimer(startTime,duration,q){
+  clearInterval(hostTimerInterval);
+  const bar=document.getElementById('hostTimerBar');
+  bar.className='timer-fill';bar.style.width='100%';
+  hostTimerInterval=setInterval(()=>{
+    const pct=Math.max(0,1-(Date.now()-startTime)/duration);
+    bar.style.width=(pct*100)+'%';
+    if(pct<0.25)bar.className='timer-fill urgent';
+    if(pct<=0){clearInterval(hostTimerInterval);setTimeout(()=>revealAnswer(q,startTime),250);}
+  },80);
+}
+
+
+
+function revealAnswer(q,startTime){
+  if(questionResolved)return;
+  questionResolved=true;
+  if(answersListener){db.ref('rooms/'+roomCode+'/answers').off('value',answersListener);answersListener=null;}
+  if(q.type==='binary'){const el=document.getElementById('opt-'+(q.answer==='pp'?'pp':'ps'));if(el)el.classList.add('is-correct');}
+  else if(q.type==='clash'){const el=document.getElementById(`opt-clash-${q.answer}`);if(el)el.classList.add('is-correct');}
+  else if(q.type!=='boss'){
+    const blank=document.getElementById('hostBlank');
+    if(blank){blank.textContent=q.answer;blank.classList.add('correct');}
+    if(q.options){const key=(typeof q.answer==='string')?q.answer.replace(/\s/g,'_').replace(/['/]/g,''):'';const el=key?document.getElementById('opt-'+key):null;if(el)el.classList.add('is-correct');}
+  } else {
+    const blank=document.getElementById('hostBlank');
+    if(blank){blank.textContent=q.answer;blank.classList.add('correct');}
+  }
+  const qStart=startTime||currentStartTime;
+  db.ref('rooms/'+roomCode+'/answers').once('value',snap=>{
+    const answers=snap.val()||{};
+    Object.entries(answers).forEach(([pid,v])=>{
+      let isCorrect=false;
+      if(q.type==='boss'){
+          // Court: correct if right wrongIdx picked AND right why
+          if(q.bossType==='court') isCorrect = v.answer===q.wrongIdx && (v.whyIdx===undefined||v.whyIdx===q.correctWhy);
+          // Detective + Impossible: tap correct index
+          else if(q.bossType==='detective'||q.bossType==='impossible') isCorrect = v.answer===q.answer;
+          // Legacy text boss
+          else isCorrect = fuzzyMatch(v.answer||'', q.answer||'');
+        }
+      else if(q.type==='binary')isCorrect=v.answer===q.answer;
+      else if(q.type==='clash')isCorrect=v.answer===q.answer;
+      else if(q.type==='justify'){
+        isCorrect=v.answer===q.answer;
+        if(isCorrect&&v.justify===q.correctJustify)db.ref(`rooms/${roomCode}/players/${pid}/score`).transaction(s=>(s||0)+5);
+      } else isCorrect=v.answer===q.answer;
+      const base=q.type==='boss'?30:10;
+      let bonus=0;
+      if(q.type!=='boss'&&isCorrect){
+        const elapsed=Math.max(0,v.time-qStart);
+        bonus=elapsed>questionDuration?0:Math.floor((Math.max(0,questionDuration-elapsed)/questionDuration)*5);
+      }
+      if(isCorrect){
+        db.ref(`rooms/${roomCode}/players/${pid}/score`).transaction(s=>(s||0)+base+bonus);
+        db.ref(`rooms/${roomCode}/players/${pid}/streak`).transaction(s=>(s||0)+1);
+      } else {
+        db.ref(`rooms/${roomCode}/players/${pid}/streak`).set(0);
+      }
+    });
+  });
+  db.ref('rooms/'+roomCode+'/currentQ/revealed').set(true);
+  if(q.explanation)db.ref('rooms/'+roomCode+'/currentQ/explanation').set(q.explanation);
+  setTimeout(()=>{renderHostLeaderboard();setTimeout(()=>pushQuestion(currentQIndex+1),2400);},1200);
+}
+
+
+
+function renderHostLeaderboard(){
+  db.ref('rooms/'+roomCode+'/players').once('value',snap=>{
+    const players=Object.values(snap.val()||{}).sort((a,b)=>b.score-a.score);
+    document.getElementById('hostLeaderboard').innerHTML=players.slice(0,8).map((p,i)=>
+      `<div class="lb-row ${i===0?'top':''}">
+        <span class="lb-pos">${i+1}</span>
+        <span class="lb-name">${esc(p.name)}</span>
+        <span class="lb-score">${p.score||0}</span>
+      </div>`
+    ).join('');
+  });
+}
+
+
+
+function endGame(){
+  clearInterval(hostTimerInterval);
+  db.ref('rooms/'+roomCode+'/status').set('ended');
+  db.ref('rooms/'+roomCode+'/players').once('value',snap=>{
+    const players=Object.values(snap.val()||{}).sort((a,b)=>b.score-a.score);
+    const medals=['🥇','🥈','🥉'];
+    document.getElementById('finalLeaderboard').innerHTML=players.map((p,i)=>
+      `<div class="podium-row ${i<3?'p'+(i+1):''}">
+        <span class="podium-medal">${medals[i]||(i+1)+'.'}</span>
+        <span class="podium-name">${esc(p.name)}</span>
+        <span class="podium-score">${p.score||0}</span>
+      </div>`
+    ).join('');
+    const winner=players[0];
+    document.getElementById('endSubtitle').textContent=winner?`${winner.name} wins — ${winner.score} pts`:'Game complete';
+    goTo('end');
+    db.ref('rooms/'+roomCode).remove();
+  });
+}
+
+
+
+function generateLobbyQR(pin) {
+  // Point QR to student file with PIN pre-filled
+  const studentBase = window.location.href.split('/').slice(0,-1).join('/') + '/' + STUDENT_FILE;
+  const joinUrl = `${studentBase}?pin=${pin}`;
+  drawQR('qrCanvas', joinUrl);
+}
+
+function drawQR(canvasId, text) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  // Use Google Charts QR API — reliable, no JS library needed
+  const url = encodeURIComponent(text);
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function() {
+    const ctx = canvas.getContext('2d');
+    // Draw white background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  };
+  img.onerror = function() {
+    // Fallback: draw a placeholder if network unavailable
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#1A1A1A';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#555';
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('QR', canvas.width/2, canvas.height/2 - 4);
+    ctx.fillText('unavailable', canvas.width/2, canvas.height/2 + 8);
+  };
+  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${url}&color=000000&bgcolor=ffffff&margin=0`;
+}
+
+
+
+
+// ═══════════════════════
+// HOST INIT
+// ═══════════════════════
+const HOST_PASSWORD = 'pp'; // ← Change this
+
+// The student join URL — update this to wherever the student file is hosted
+// During development this points to the same directory
+const STUDENT_FILE = 'done-did-it-feed.html';
+
+window.addEventListener('DOMContentLoaded', () => {
+  goTo('host-pw');
+  setTimeout(() => {
+    const pw = document.getElementById('hostPwInput');
+    if (pw) pw.focus();
+  }, 200);
+});
+
+function checkHostPw() {
+  const val = document.getElementById('hostPwInput').value;
+  const err = document.getElementById('hostPwError');
+  if (val === HOST_PASSWORD) {
+    err.textContent = '';
+    document.getElementById('hostPwInput').value = '';
+    goTo('host-setup');
+  } else {
+    err.textContent = 'Wrong password';
+    document.getElementById('hostPwInput').value = '';
+    document.getElementById('hostPwInput').focus();
+  }
+}
+
+</script>
+</body>
+</html>

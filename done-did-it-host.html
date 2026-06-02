@@ -350,12 +350,10 @@ select{width:100%;background:var(--raised);border:1px solid var(--border-bright)
     </div>
 
     <!-- QR code -->
-    <div style="width:100%;background:var(--surface);border-bottom:1px solid var(--border);padding:20px 16px;display:flex;align-items:center;gap:16px;margin-bottom:1px">
-      <canvas id="qrCanvas" width="96" height="96" style="flex-shrink:0;image-rendering:pixelated;background:#fff;padding:4px"></canvas>
-      <div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Scan to join</div>
-        <div style="font-size:13px;color:var(--mid);line-height:1.5">Students can scan this QR code to open the game and join with the PIN pre-filled.</div>
-      </div>
+    <div style="width:100%;background:var(--surface);border-bottom:1px solid var(--border);padding:24px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:1px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">Scan to join</div>
+      <canvas id="qrCanvas" width="220" height="220" style="image-rendering:pixelated;background:#fff;padding:8px"></canvas>
+      <div style="font-size:13px;color:var(--mid);text-align:center">Students scan this to open the game with the PIN pre-filled.</div>
     </div>
 
     <!-- Player list -->
@@ -1589,7 +1587,7 @@ function drawQR(canvasId, text) {
     ctx.fillText('QR', canvas.width/2, canvas.height/2 - 4);
     ctx.fillText('unavailable', canvas.width/2, canvas.height/2 + 8);
   };
-  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${url}&color=000000&bgcolor=ffffff&margin=0`;
+  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${url}&color=000000&bgcolor=ffffff&margin=0`;
 }
 
 

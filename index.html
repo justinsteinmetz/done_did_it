@@ -2,778 +2,496 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SIGNAL — Multiplayer</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DONE DID IT</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
-<!-- Firebase compat (not modular) -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
 <style>
 :root {
-  --bg: #0f0e17;
-  --surface: #1a1825;
-  --raised: #231f30;
-  --border: rgba(255,255,255,0.09);
-  --border-bright: rgba(255,255,255,0.22);
-  --text: #f0ede8;
-  --muted: #7c7a8e;
-  --mid: #b0aec0;
-  --accent: #f5c518;
-  --accent-dim: rgba(245,197,24,0.13);
-  --accent-border: rgba(245,197,24,0.35);
-  --green: #22c55e;
-  --green-dim: rgba(34,197,94,0.15);
-  --red: #ef4444;
-  --red-dim: rgba(239,68,68,0.15);
-  --r1: #f97316; --r1-dim: rgba(249,115,22,0.15); --r1-border: rgba(249,115,22,0.4);
-  --r2: #a855f7; --r2-dim: rgba(168,85,247,0.15); --r2-border: rgba(168,85,247,0.4);
-  --r3: #06b6d4; --r3-dim: rgba(6,182,212,0.15);  --r3-border: rgba(6,182,212,0.4);
-  --r4: #ec4899; --r4-dim: rgba(236,72,153,0.15); --r4-border: rgba(236,72,153,0.4);
-  --rc: var(--accent);
-  --rc-dim: var(--accent-dim);
-  --rc-border: var(--accent-border);
+  --bg:#000;--surface:#0D0D0D;--raised:#1A1A1A;
+  --border:rgba(255,255,255,0.1);--border-bright:rgba(255,255,255,0.22);
+  --text:#FFF;--muted:#555;--mid:#888;
+  --correct:#25D366;--correct-dim:rgba(37,211,102,0.12);--correct-border:rgba(37,211,102,0.4);
+  --wrong:#FF3040;--wrong-dim:rgba(255,48,64,0.12);--wrong-border:rgba(255,48,64,0.4);
+  --rc:#FE2C55;--rc-dim:rgba(254,44,85,0.12);--rc-border:rgba(254,44,85,0.4);
+  --r1:#FE2C55;--r1d:rgba(254,44,85,0.12);--r1b:rgba(254,44,85,0.4);
+  --r2:#FF9900;--r2d:rgba(255,153,0,0.12);--r2b:rgba(255,153,0,0.4);
+  --r3:#A259FF;--r3d:rgba(162,89,255,0.12);--r3b:rgba(162,89,255,0.4);
+  --r4:#25D366;--r4d:rgba(37,211,102,0.12);--r4b:rgba(37,211,102,0.4);
+  --r5:#00B4D8;--r5d:rgba(0,180,216,0.12);--r5b:rgba(0,180,216,0.4);
+  --rb:#FE2C55;--rbd:rgba(254,44,85,0.12);--rbb:rgba(254,44,85,0.4);
+  --border-dark:rgba(255,255,255,0.14);
+  --shadow-sm:none;--shadow-md:none;--shadow-lg:none;--radius:0px;--radius-sm:3px;
 }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* Round body tints — each round subtly shifts the screen atmosphere */
+body[data-round="1"] { --surface:#0F0A0B; --raised:#1A0F11; }
+body[data-round="2"] { --surface:#0F0B08; --raised:#1A1208; }
+body[data-round="3"] { --surface:#0A080F; --raised:#100F1A; }
+body[data-round="4"] { --surface:#080F0A; --raised:#0F1A10; }
+body[data-round="5"] { --surface:#060E12; --raised:#0C1820; }
+body[data-round="boss"] { --surface:#100508; --raised:#1A0810; }
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Syne', sans-serif;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  overflow-x: hidden;
-}
+/* Post card border accent per round */
+body[data-round] .post-card { border-left: 2px solid transparent; }
+body[data-round="1"] .post-card { border-left-color: rgba(254,44,85,0.25); }
+body[data-round="2"] .post-card { border-left-color: rgba(255,153,0,0.2); }
+body[data-round="3"] .post-card { border-left-color: rgba(162,89,255,0.2); }
+body[data-round="4"] .post-card { border-left-color: rgba(37,211,102,0.2); }
+body[data-round="5"] .post-card { border-left-color: rgba(0,180,216,0.2); }
+body[data-round="boss"] .post-card { border-left-color: rgba(254,44,85,0.4); }
+.wrap{width:100%;max-width:480px;margin:0 auto;padding:0 0 60px;position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+.screen{display:none;flex-direction:column;align-items:center;width:100%}
+.screen.active{display:flex}
 
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 20% 0%, rgba(249,115,22,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 80% 100%, rgba(168,85,247,0.06) 0%, transparent 60%);
-  pointer-events: none; z-index: 0;
+.logo{
+  font-family:'Inter',sans-serif;font-weight:900;
+  font-size:clamp(44px,13vw,72px);
+  letter-spacing:-0.06em;line-height:0.88;
+  text-align:left;color:var(--text);
+  margin-bottom:2px;user-select:none;
+  width:100%;
 }
+.logo em{font-style:normal;color:var(--rc)}
+.logo-eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px;width:100%;display:block;
+}
+.logo span{color:var(--rc)}
+.logo-sub{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:32px}
 
-body::after {
-  content: '';
-  position: fixed; inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none; z-index: 0;
-}
+.post-card{width:100%;background:var(--surface);border-bottom:1px solid var(--border);margin-bottom:1px}
+.post-header{display:flex;align-items:center;gap:10px;padding:12px 16px 8px}
+.post-avatar{width:34px;height:34px;border-radius:50%;background:var(--raised);border:2px solid var(--rc);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.post-handle{font-size:13px;font-weight:700;color:var(--text)}
+.post-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-left:auto}
+.post-body{padding:10px 16px 16px}
+.post-context{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.post-text{font-size:clamp(19px,4vw,25px);font-weight:700;line-height:1.35;letter-spacing:-0.02em}
+.post-blank{display:inline-block;min-width:110px;border-bottom:2px solid var(--rc);color:var(--rc);text-align:center;padding:0 6px;vertical-align:bottom;font-style:italic;transition:all 0.2s}
+.post-blank.correct{color:var(--correct);border-bottom-color:var(--correct);font-style:normal}
 
-.wrap {
-  width: 100%;
-  max-width: 620px;
-  position: relative;
-  z-index: 1;
-}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;letter-spacing:-0.01em;border:none;cursor:pointer;width:100%;padding:16px 20px;border-radius:var(--radius-sm);transition:opacity 0.12s,transform 0.1s}
+.btn:active{transform:scale(0.97)}
+.btn-primary{background:var(--text);color:#000;margin-bottom:10px}
+.btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border-bright);margin-bottom:10px}
+.btn-secondary:hover{border-color:var(--rc);color:var(--rc)}
+.btn-accent{background:var(--rc);color:#fff;margin-bottom:10px}
+.btn-ghost{background:none;border:none;color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;cursor:pointer;padding:10px;margin-top:4px}
+.btn-ghost:hover{color:var(--text)}
+.btn:disabled{opacity:0.25;cursor:not-allowed}
 
-/* ── SCREENS ── */
-.screen { display: none; flex-direction: column; align-items: center; }
-.screen.active { display: flex; }
+.field-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);align-self:flex-start;margin-bottom:6px}
+input[type=text]{width:100%;background:var(--raised);border:1px solid var(--border-bright);border-radius:var(--radius-sm);color:var(--text);font-family:'Inter',sans-serif;font-size:17px;font-weight:500;padding:14px 16px;margin-bottom:14px;outline:none;transition:border-color 0.2s;-webkit-appearance:none}
+input[type=text]:focus{border-color:var(--rc)}
+input[type=text]::placeholder{color:var(--muted);font-size:14px}
+select{width:100%;background:var(--raised);border:1px solid var(--border-bright);border-radius:var(--radius-sm);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;font-weight:500;padding:14px 16px;margin-bottom:14px;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none}
+.err{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--wrong);margin-bottom:10px;min-height:18px;align-self:flex-start}
 
-/* ── SHARED ── */
-.logo {
-  font-size: clamp(52px, 12vw, 80px);
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  background: linear-gradient(135deg, #f97316 0%, #f5c518 35%, #a855f7 65%, #06b6d4 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  margin-bottom: 4px;
-}
+#menu{text-align:center;padding-top:60px}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-bottom:10px}
 
-.eyebrow {
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 40px;
-}
+.notif-pill{display:inline-flex;align-items:center;gap:6px;background:var(--rc);color:#fff;border-radius:3px;padding:6px 14px;font-size:12px;font-weight:700;letter-spacing:0.02em;margin-bottom:20px}
 
-.btn-primary {
-  background: var(--accent);
-  color: #000;
-  border: none;
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: 15px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  padding: 15px 32px;
-  cursor: pointer;
-  width: 100%;
-  transition: transform 0.12s, box-shadow 0.12s;
-  margin-bottom: 10px;
-}
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,197,24,0.3); }
-.btn-primary:active { transform: scale(0.98); }
+.code-card{width:100%;background:var(--surface);border-bottom:1px solid var(--border);padding:32px 20px;text-align:center;margin-bottom:1px;border-top:3px solid var(--rc)}
+.code-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.code-value{font-family:'Inter',sans-serif;font-weight:900;font-size:72px;letter-spacing:0.04em;color:var(--text);line-height:1;margin-bottom:4px}
+.code-sub{font-size:13px;color:var(--muted);margin-top:6px}
 
-.btn-secondary {
-  background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--border-bright);
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: 15px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  padding: 15px 32px;
-  cursor: pointer;
-  width: 100%;
-  transition: all 0.15s;
-  margin-bottom: 10px;
-}
-.btn-secondary:hover { border-color: var(--accent-border); color: var(--accent); background: var(--accent-dim); }
+.plist-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;align-self:flex-start;padding:0 16px}
+.pchips{display:flex;flex-wrap:wrap;gap:8px;min-height:44px;width:100%;margin-bottom:20px;padding:0 16px}
+.pchip{background:var(--raised);border:1px solid var(--border-bright);border-radius:3px;padding:6px 14px;font-size:13px;font-weight:600;animation:popIn 0.18s ease}
+@keyframes popIn{from{opacity:0;transform:scale(0.75)}to{opacity:1;transform:scale(1)}}
 
-.btn-ghost {
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  cursor: pointer;
-  padding: 8px;
-  transition: color 0.15s;
-}
-.btn-ghost:hover { color: var(--text); }
+.game-header{width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px}
+.round-tag{background:var(--rc-dim);color:var(--rc);border:1px solid var(--rc-border);border-radius:3px;padding:4px 10px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;font-weight:700}
+.q-counter{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;color:var(--mid)}
+.ans-count{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
 
-.field-label {
-  font-family: 'Space Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-  align-self: flex-start;
-  margin-bottom: 6px;
-}
+.timer-wrap{width:100%;height:2px;background:var(--raised);margin-bottom:0}
+.timer-fill{height:100%;background:var(--rc);transition:width 0.1s linear}
+.timer-fill.urgent{background:var(--wrong)}
 
-input[type=text] {
-  width: 100%;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-family: 'Syne', sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  padding: 14px 16px;
-  margin-bottom: 16px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  outline: none;
-  transition: border-color 0.2s;
-}
-input[type=text]:focus { border-color: var(--accent-border); }
-input[type=text]::placeholder { color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; }
+.host-opts{display:grid;grid-template-columns:1fr 1fr;gap:1px;width:100%;margin-bottom:1px;background:var(--border)}
+.host-opt{background:var(--surface);padding:16px 12px;text-align:center;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;position:relative;color:var(--text)}
+.host-opt.is-correct{background:var(--correct-dim);color:var(--correct)}
+.host-opt .opt-count{position:absolute;top:6px;right:8px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)}
 
-.error-msg {
-  font-family: 'Space Mono', monospace;
-  font-size: 12px;
-  color: var(--red);
-  margin-bottom: 12px;
-  min-height: 18px;
-  align-self: flex-start;
-}
+.lb-card{width:100%;background:var(--surface);border-bottom:1px solid var(--border);margin-bottom:1px}
+.lb-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;align-self:flex-start;padding:0 16px}
+.lb-row{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--border)}
+.lb-row:last-child{border-bottom:none}
+.lb-pos{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);width:20px}
+.lb-name{font-size:14px;font-weight:600;flex:1;margin:0 10px}
+.lb-score{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--rc)}
+.lb-row.top{background:var(--rc-dim)}
+.lb-row.top .lb-pos{color:var(--rc)}
 
-/* ── MENU ── */
-#menu { text-align: center; gap: 0; }
-.menu-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 0; }
+#player-game{text-align:left;width:100%}
+.pq-text{font-size:clamp(20px,4.5vw,26px);font-weight:700;line-height:1.35;letter-spacing:-0.02em;margin-bottom:0;min-height:64px}
+.p-opts{display:grid;grid-template-columns:1fr 1fr;gap:1px;width:100%;margin-bottom:1px;background:var(--border)}
+.p-opt{background:var(--surface);color:var(--text);font-family:'Inter',sans-serif;font-weight:700;font-size:clamp(14px,3vw,17px);padding:22px 14px;cursor:pointer;transition:background 0.1s;text-align:center;border:none}
+.p-opt:hover:not(:disabled){background:var(--raised)}
+.p-opt:disabled{cursor:not-allowed;opacity:0.35}
+.p-opt.answered-correct{background:var(--correct-dim)!important;color:var(--correct)!important;opacity:1!important}
+.p-opt.answered-wrong{background:var(--wrong-dim)!important;color:var(--wrong)!important;opacity:1!important}
+.p-opt.reveal-correct{background:var(--correct-dim)!important;color:var(--correct)!important;opacity:1!important}
 
-/* ── HOST LOBBY ── */
-.room-code-display {
-  background: var(--surface);
-  border: 2px solid var(--accent-border);
-  padding: 24px;
-  text-align: center;
-  width: 100%;
-  margin-bottom: 24px;
-}
-.room-code-label {
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 8px;
-}
-.room-code-value {
-  font-family: 'Space Mono', monospace;
-  font-size: 48px;
-  font-weight: 700;
-  color: var(--accent);
-  letter-spacing: 0.12em;
-}
-.room-code-hint {
-  font-size: 13px;
-  color: var(--muted);
-  margin-top: 8px;
-}
+.swipe-area{width:100%;display:flex;gap:1px;margin-bottom:1px;background:var(--border)}
+.swipe-btn{flex:1;padding:28px 10px;font-family:'Inter',sans-serif;font-weight:800;font-size:17px;letter-spacing:-0.02em;border:none;cursor:pointer;transition:background 0.1s;background:var(--surface)}
+.swipe-pp{color:var(--r1)}.swipe-pp:hover:not(:disabled){background:var(--r1d)}
+.swipe-ps{color:var(--r2)}.swipe-ps:hover:not(:disabled){background:var(--r2d)}
+.swipe-btn:disabled{opacity:0.3;cursor:not-allowed}
+.swipe-btn.chosen-correct{background:var(--correct-dim)!important;color:var(--correct)!important;opacity:1!important}
+.swipe-btn.chosen-wrong{background:var(--wrong-dim)!important;color:var(--wrong)!important;opacity:1!important}
+.swipe-btn.reveal-correct{background:var(--correct-dim)!important;color:var(--correct)!important;opacity:1!important}
 
-.player-list {
-  width: 100%;
-  margin-bottom: 24px;
-}
-.player-list-label {
-  font-family: 'Space Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 10px;
-}
-.player-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  min-height: 40px;
-}
-.player-chip {
-  background: var(--raised);
-  border: 1px solid var(--border);
-  padding: 6px 14px;
-  font-size: 14px;
-  font-weight: 600;
-  animation: popIn 0.2s ease;
-}
-@keyframes popIn {
-  from { opacity: 0; transform: scale(0.8); }
-  to { opacity: 1; transform: scale(1); }
-}
-.waiting-hint {
-  font-size: 13px;
-  color: var(--muted);
-  font-style: italic;
-}
+.justify-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0;display:block;padding:12px 16px 8px}
+.justify-tiles{display:flex;flex-direction:column;gap:1px;width:100%;margin-bottom:1px;background:var(--border)}
+.j-tile{background:var(--surface);padding:16px;font-size:14px;font-weight:500;cursor:pointer;transition:background 0.1s;width:100%;text-align:left;color:var(--text);border:none}
+.j-tile:hover:not(.locked){background:var(--raised)}
+.j-tile.j-correct{background:var(--correct-dim)!important;color:var(--correct)!important}
+.j-tile.j-wrong{background:var(--wrong-dim)!important;color:var(--wrong)!important}
+.j-tile.locked{cursor:not-allowed;opacity:0.6}
 
-/* ── GAME SCREEN (host) ── */
-.game-header {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-.round-tag {
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--rc);
-}
-.q-counter {
-  font-family: 'Space Mono', monospace;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-}
-.answers-in {
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  color: var(--muted);
-}
+#boss-input-wrap{display:none;width:100%;margin-bottom:1px}
+.boss-card{background:var(--rc-dim);border-bottom:1px solid var(--rc-border);padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--rc);text-transform:uppercase}
 
-.timer-bar-wrap { width: 100%; height: 4px; background: var(--border); margin-bottom: 24px; }
-.timer-bar-fill { height: 100%; background: var(--rc); transition: width 0.1s linear; }
-.timer-bar-fill.urgent { background: var(--red); }
+.pfeedback{font-family:'Inter',sans-serif;font-size:14px;font-weight:600;min-height:20px;padding:12px 16px;letter-spacing:-0.01em}
+.fb-correct{color:var(--correct)}.fb-wrong{color:var(--wrong)}.fb-wait{color:var(--muted)}
 
-.question-card {
-  width: 100%;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-top: 3px solid var(--rc);
-  padding: 28px 24px;
-  margin-bottom: 16px;
-}
-.q-context {
-  font-family: 'Space Mono', monospace;
-  font-size: 10px;
-  color: var(--muted);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 10px;
-}
-.q-text {
-  font-size: clamp(22px, 4vw, 30px);
-  font-weight: 700;
-  line-height: 1.3;
-}
-.q-blank {
-  display: inline-block;
-  min-width: 110px;
-  border-bottom: 3px solid var(--rc);
-  color: var(--rc);
-  text-align: center;
-  padding: 0 6px;
-  vertical-align: bottom;
-  transition: all 0.25s;
-}
-.q-blank.correct { color: var(--green); border-bottom-color: var(--green); }
+.score-strip{width:100%;background:var(--surface);border-top:1px solid var(--border);padding:12px 0;display:flex}
+.score-item{flex:1;text-align:center;border-right:1px solid var(--border)}
+.score-item:last-child{border-right:none}
+.score-val{font-family:'Inter',sans-serif;font-weight:800;font-size:28px;color:var(--rc);line-height:1;letter-spacing:-0.03em;display:block;margin-bottom:2px}
+.score-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)}
 
-.options-host {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  width: 100%;
-  margin-bottom: 20px;
-}
-.opt-host {
-  background: var(--rc-dim);
-  border: 2px solid var(--rc-border);
-  color: var(--text);
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: 16px;
-  padding: 16px 12px;
-  text-align: center;
-  transition: all 0.25s;
-  position: relative;
-}
-.opt-host.is-correct {
-  background: var(--green-dim);
-  border-color: var(--green);
-  color: var(--green);
-}
-.opt-host .opt-count {
-  position: absolute;
-  top: 6px; right: 8px;
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  color: var(--muted);
-}
+.lives-row{display:flex;gap:3px;align-items:flex-end;padding:0 4px}
+.bar{width:5px;border-radius:1px;background:var(--rc);transition:all 0.25s}
+.bar.b1{height:8px}.bar.b2{height:12px}.bar.b3{height:16px}
+.bar.dead{background:var(--raised)}
 
-/* LEADERBOARD */
-.lb-wrap {
-  width: 100%;
-  margin-bottom: 20px;
-}
-.lb-label {
-  font-family: 'Space Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 8px;
-}
-.lb-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--border);
-  transition: all 0.3s;
-}
-.lb-row:first-child { border-top: 1px solid var(--border); }
-.lb-pos {
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  color: var(--muted);
-  width: 24px;
-}
-.lb-name { font-size: 14px; font-weight: 600; flex: 1; margin: 0 12px; }
-.lb-score {
-  font-family: 'Space Mono', monospace;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--accent);
-}
-.lb-row.top { background: var(--accent-dim); }
-.lb-row.top .lb-pos { color: var(--accent); }
-.lb-row.top .lb-name { color: var(--text); }
+#s-round-screen{text-align:left;padding:0;overflow:hidden}
 
-/* ── PLAYER SCREEN ── */
-#player-game { text-align: center; width: 100%; }
-.player-status {
-  font-family: 'Space Mono', monospace;
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 32px;
-  letter-spacing: 0.08em;
+/* Round transition — full screen colour flood */
+.rt-hero{
+  width:100%;
+  min-height:52vh;
+  background:var(--rc-dim);
+  border-bottom:1px solid var(--rc-border);
+  padding:48px 20px 32px;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  position:relative;
+  overflow:hidden;
 }
-.player-question {
-  font-size: clamp(24px, 5vw, 34px);
-  font-weight: 700;
-  line-height: 1.3;
-  margin-bottom: 28px;
-  min-height: 80px;
+.rt-hero::before{
+  content:'';
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 120% 80% at 10% 110%, var(--rc) 0%, transparent 65%);
+  opacity:0.15;
+  pointer-events:none;
 }
-.player-options {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  width: 100%;
-  margin-bottom: 24px;
+.rt-round-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--rc);margin-bottom:12px;opacity:0.8;
 }
-.opt-player {
-  background: var(--rc-dim);
-  border: 2px solid var(--rc-border);
-  color: var(--text);
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: clamp(16px, 3.5vw, 20px);
-  padding: 22px 16px;
-  cursor: pointer;
-  transition: all 0.15s;
-  border-radius: 4px;
+.rt-name{
+  font-family:'Inter',sans-serif;font-weight:900;
+  font-size:clamp(48px,11vw,72px);
+  letter-spacing:-0.05em;color:var(--text);
+  line-height:0.9;margin-bottom:0;
 }
-.opt-player:hover:not(:disabled) {
-  border-color: var(--rc);
-  color: var(--rc);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+.rt-name em{font-style:normal;color:var(--rc)}
+.rt-mechanic{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--mid);
+  letter-spacing:0.08em;
+  margin-top:14px;
+  text-transform:uppercase;
 }
-.opt-player:disabled { cursor: not-allowed; opacity: 0.5; }
-.opt-player.answered-correct {
-  background: var(--green-dim);
-  border-color: var(--green);
-  color: var(--green);
-  opacity: 1 !important;
-  transform: scale(1.02);
+.rt-body{padding:20px}
+.rt-rule-card{
+  background:var(--surface);
+  border-top:2px solid var(--rc);
+  border-bottom:1px solid var(--border);
+  padding:18px;margin-bottom:16px;
+  text-align:left;font-size:14px;color:var(--mid);line-height:1.7;
+  width:100%;
 }
-.opt-player.answered-wrong {
-  background: var(--red-dim);
-  border-color: var(--red);
-  color: var(--red);
-  opacity: 1 !important;
-}
-.opt-player.reveal-correct {
-  background: var(--green-dim);
-  border-color: var(--green);
-  color: var(--green);
-  opacity: 1 !important;
-}
+.rt-rule-card strong{color:var(--text)}
+.rt-example{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--rc);display:block;margin-top:8px}
 
-.player-feedback {
-  font-family: 'Space Mono', monospace;
-  font-size: 13px;
-  min-height: 20px;
-  margin-bottom: 16px;
-  transition: all 0.2s;
-}
-.fb-correct { color: var(--green); }
-.fb-wrong { color: var(--red); }
-.fb-waiting { color: var(--muted); }
+#player-waiting{text-align:center;padding:60px 20px 0}
+.wait-icon{font-size:56px;margin-bottom:12px;line-height:1}
+.wait-status{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.1em;margin-bottom:24px;text-transform:uppercase}
 
-.player-score-display {
-  font-family: 'Space Mono', monospace;
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--accent);
-}
-.player-score-label {
-  font-family: 'Space Mono', monospace;
-  font-size: 10px;
-  color: var(--muted);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
+.solo-header{width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px}
+.prog-bar{width:100%;height:1px;background:var(--raised);overflow:hidden}
+.prog-fill{height:100%;background:var(--rc);transition:width 0.3s ease}
 
-/* ── END SCREEN ── */
-#end { text-align: center; }
-.end-grade {
-  font-size: clamp(80px, 18vw, 120px);
-  font-weight: 800;
-  letter-spacing: -0.05em;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-.end-subtitle {
-  font-family: 'Space Mono', monospace;
-  font-size: 12px;
-  color: var(--muted);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  margin-bottom: 32px;
-}
-.final-lb { width: 100%; margin-bottom: 32px; }
-.final-lb-title {
-  font-family: 'Space Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 10px;
-}
-.podium-row {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  margin-bottom: 6px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-}
-.podium-row.p1 { border-color: var(--accent-border); background: var(--accent-dim); }
-.podium-row.p2 { border-color: rgba(192,192,192,0.3); }
-.podium-row.p3 { border-color: rgba(180,100,50,0.3); }
-.podium-medal { font-size: 20px; margin-right: 12px; width: 28px; text-align: center; }
-.podium-name { flex: 1; font-size: 16px; font-weight: 700; }
-.podium-score {
-  font-family: 'Space Mono', monospace;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--accent);
-}
+#end,#s-end-screen{text-align:center;padding:40px 20px 0}
+.end-grade{font-family:'Inter',sans-serif;font-weight:900;font-size:clamp(90px,22vw,130px);letter-spacing:-0.05em;line-height:1;color:var(--text);margin-bottom:4px}
+.end-grade span{color:var(--rc)}
+.end-sub{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:24px}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;width:100%;margin-bottom:1px;background:var(--border)}
+.stat-cell{background:var(--surface);padding:16px 8px;text-align:center}
+.stat-val{font-family:'Inter',sans-serif;font-weight:800;font-size:26px;color:var(--rc);display:block;margin-bottom:3px;letter-spacing:-0.03em}
+.stat-lbl{font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
+.ach-row{width:100%;display:flex;flex-direction:column;gap:1px;margin-bottom:1px;background:var(--border)}
+.ach{background:var(--surface);padding:14px 16px;display:flex;align-items:center;gap:12px}
+.ach-icon{font-size:20px;width:28px;text-align:center}
+.ach-body{text-align:left}
+.ach-name{font-size:14px;font-weight:700;color:var(--text)}
+.ach-desc{font-size:12px;color:var(--muted);margin-top:1px}
+.grammar-insight{width:100%;background:var(--surface);border-top:2px solid var(--rc);border-bottom:1px solid var(--border);padding:18px 16px;margin-bottom:1px;text-align:left}
+.gi-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.gi-text{font-size:13px;color:var(--mid);line-height:1.7}
+.podium-row{display:flex;align-items:center;padding:13px 16px;background:var(--surface);border-bottom:1px solid var(--border)}
+.podium-row.p1{border-left:3px solid var(--rc)}
+.podium-medal{font-size:18px;margin-right:10px;width:24px;text-align:center}
+.podium-name{flex:1;font-size:15px;font-weight:600}
+.podium-score{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--rc)}
+.end-message{font-size:14px;color:var(--mid);line-height:1.7;margin:16px 0 24px;max-width:360px;text-align:center}
 
-/* ── ANIMATIONS ── */
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes shake {
-  0%,100% { transform: translateX(0); }
-  20% { transform: translateX(-6px); }
-  40% { transform: translateX(6px); }
-  60% { transform: translateX(-4px); }
-  80% { transform: translateX(4px); }
-}
-@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+.boss-cloud{width:100%;min-height:52px;background:var(--rc-dim);border-bottom:1px solid var(--rc-border);padding:12px 14px;margin-top:1px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.cloud-word{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--rc);padding:3px 8px;background:rgba(254,44,85,0.08);border-radius:2px;animation:popIn 0.2s ease}
+.cloud-correct{color:var(--correct)!important;background:var(--correct-dim)!important}
 
-.anim-in { animation: slideUp 0.28s ease forwards; }
-.shake { animation: shake 0.35s ease; }
-.pulse { animation: pulse 0.3s ease; }
+.flash{position:fixed;inset:0;pointer-events:none;z-index:900;opacity:0;transition:opacity 0.07s}
+.flash.green{background:rgba(37,211,102,0.08);opacity:1}
+.flash.red{background:rgba(255,48,64,0.08);opacity:1}
+.flash.boss{background:rgba(254,44,85,0.07);opacity:1}
 
-.flash {
-  position: fixed; inset: 0;
-  pointer-events: none; z-index: 100;
-  opacity: 0; transition: opacity 0.08s;
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes roundArrive{
+  0%{opacity:0;transform:translateY(20px)}
+  60%{opacity:1;transform:translateY(-3px)}
+  100%{opacity:1;transform:translateY(0)}
 }
-.flash.green { background: rgba(34,197,94,0.08); opacity: 1; }
-.flash.red { background: rgba(239,68,68,0.08); opacity: 1; }
+@keyframes heroFlood{
+  0%{opacity:0}
+  100%{opacity:1}
+}
+@keyframes nameStrike{
+  0%{opacity:0;letter-spacing:-0.1em}
+  50%{opacity:1;letter-spacing:-0.04em}
+  100%{opacity:1;letter-spacing:-0.05em}
+}
+.anim-in{animation:slideUp 0.22s ease forwards}
+.rt-hero.arriving{animation:heroFlood 0.35s ease forwards}
+.rt-hero.arriving .rt-name{animation:nameStrike 0.4s ease 0.1s both}
+.rt-hero.arriving .rt-mechanic{animation:slideUp 0.3s ease 0.25s both}
+.rt-hero.arriving .rt-round-num{animation:slideUp 0.3s ease 0s both}
+.divider{width:100%;height:1px;background:var(--border);margin:0}
+.section-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;align-self:flex-start;padding:0 16px}
+.padded{padding:20px 16px}
 </style>
 </head>
 <body>
 
 <div class="flash" id="flash"></div>
 <div class="wrap">
-
-  <!-- ── MENU ── -->
-  <div class="screen active" id="menu">
-    <div class="logo">SIGNAL</div>
-    <div class="eyebrow">Present Progressive</div>
-    <div style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-      <button class="btn-primary" onclick="goTo('host-setup')">Host</button>
-      <button class="btn-secondary" onclick="goTo('join-screen')">Join</button>
+<!-- ════ STUDENT ENTRY (default) ════ -->
+  <div class="screen active" id="menu" style="padding:48px 16px 0">
+    <div style="margin-top:8px;margin-bottom:32px;width:100%">
+      <span class="logo-eyebrow">Present Perfect vs Past Simple</span>
+      <div class="logo">DONE<br><em>DID IT</em></div>
     </div>
-    <button class="btn-secondary" onclick="startSolo()" style="width:100%;border-color:var(--r2-border);color:var(--text)">
-      Solo — Play alone
-    </button>
+    <button class="btn btn-accent" onclick="goTo('join-screen')" style="margin-bottom:10px">Join a game →</button>
+    <button class="btn btn-secondary" onclick="startSolo()">Solo — play alone</button>
   </div>
 
-  <!-- ── HOST SETUP ── -->
-  <div class="screen" id="host-setup">
-    <div class="logo">HOST</div>
-    <div class="eyebrow">Create a game room</div>
-    <div style="width:100%;margin-bottom:8px">
-      <div class="field-label">Number of questions</div>
-      <select id="qCount" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'Syne',sans-serif;font-size:16px;font-weight:700;padding:14px 16px;margin-bottom:16px;outline:none;">
-        <option value="10">10 — Quick</option>
-        <option value="20" selected>20 — Standard</option>
-        <option value="40">40 — Full game</option>
-      </select>
+  
+<!-- ════ JOIN ════ -->
+  <div class="screen" id="join-screen" style="padding:48px 16px 0">
+    <div style="width:100%;margin-bottom:28px">
+      <span class="logo-eyebrow">Enter your details</span>
+      <div class="logo" style="font-size:clamp(36px,10vw,52px)">Join<br><em>a game</em></div>
     </div>
-    <div style="width:100%;margin-bottom:8px">
-      <div class="field-label">Time per question</div>
-      <select id="qTime" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'Syne',sans-serif;font-size:16px;font-weight:700;padding:14px 16px;margin-bottom:24px;outline:none;">
-        <option value="8000">8 seconds</option>
-        <option value="10000" selected>10 seconds</option>
-        <option value="15000">15 seconds</option>
-      </select>
-    </div>
-    <button class="btn-primary" onclick="createRoom()">Create room</button>
-    <button class="btn-ghost" onclick="goTo('menu')">← Back</button>
-  </div>
-
-  <!-- ── HOST LOBBY ── -->
-  <div class="screen" id="host-lobby">
-    <div class="room-code-display">
-      <div class="room-code-label">Room code</div>
-      <div class="room-code-value" id="roomCodeDisplay">----</div>
-      <div class="room-code-hint">Students: open this page and click Join</div>
-    </div>
-    <div class="player-list">
-      <div class="player-list-label">Players joined</div>
-      <div class="player-chips" id="lobbyPlayers">
-        <span class="waiting-hint">Waiting for players…</span>
-      </div>
-    </div>
-    <button class="btn-primary" id="startBtn" onclick="startGame()" disabled style="opacity:0.4">
-      Start game
-    </button>
-    <button class="btn-ghost" onclick="cancelRoom()">Cancel</button>
-  </div>
-
-  <!-- ── HOST GAME ── -->
-  <div class="screen" id="host-game">
-    <div class="game-header">
-      <div class="round-tag" id="hostRoundTag">Round 1</div>
-      <div class="q-counter" id="hostQCounter">1 / 20</div>
-      <div class="answers-in" id="hostAnswersIn">0 answers</div>
-    </div>
-    <div class="timer-bar-wrap">
-      <div class="timer-bar-fill" id="hostTimerBar" style="width:100%"></div>
-    </div>
-    <div class="question-card anim-in" id="hostQuestionCard">
-      <div class="q-context" id="hostQContext"></div>
-      <div class="q-text" id="hostQText"></div>
-    </div>
-    <div class="options-host" id="hostOptions"></div>
-    <div class="lb-wrap">
-      <div class="lb-label">Scores</div>
-      <div id="hostLeaderboard"></div>
-    </div>
-  </div>
-
-  <!-- ── JOIN SCREEN ── -->
-  <div class="screen" id="join-screen">
-    <div class="logo">JOIN</div>
-    <div class="eyebrow">Enter your details</div>
     <div style="width:100%">
       <div class="field-label">Your name</div>
-      <input type="text" id="joinName" placeholder="e.g. Anna" maxlength="16"
-        style="text-transform:none;letter-spacing:0;font-size:18px;">
-      <div class="field-label">Room code</div>
-      <input type="text" id="joinCode" placeholder="e.g. AB3X" maxlength="4">
-      <div class="error-msg" id="joinError"></div>
-      <button class="btn-primary" onclick="joinRoom()">Join</button>
+      <input type="text" id="joinName" placeholder="Your name" maxlength="16"
+        autocomplete="off" autocorrect="off" autocapitalize="words">
+      <div class="field-label">Game PIN</div>
+      <input type="text" id="joinCode" placeholder="4-letter PIN" maxlength="4" oninput="this.value=this.value.toUpperCase()"
+        autocomplete="off" autocorrect="off" autocapitalize="characters"
+        style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase">
+      <div class="err" id="joinError"></div>
+      <button class="btn btn-accent" onclick="joinRoom()">Join →</button>
       <button class="btn-ghost" onclick="goTo('menu')">← Back</button>
     </div>
   </div>
 
-  <!-- ── PLAYER WAITING ── -->
-  <div class="screen" id="player-waiting">
-    <div class="logo" style="font-size:48px;margin-bottom:16px">⚡</div>
-    <div class="eyebrow">You're in!</div>
-    <div class="player-status" id="playerWaitStatus">Waiting for the host to start…</div>
-    <div class="player-score-label">Your score</div>
-    <div class="player-score-display" id="playerScoreWait">0</div>
+  
+<!-- ════ PLAYER WAITING ════ -->
+  <div class="screen" id="player-waiting" style="text-align:center;padding:60px 16px 0">
+    <div style="margin-top:40px">
+      <div class="notif-pill">✓ You're in</div>
+      <div class="wait-status" id="playerWaitStatus">Waiting for host…</div>
+      <div class="score-strip" style="max-width:200px;margin:0 auto">
+        <div class="score-item" style="border:none">
+          <span class="score-val" id="playerScoreWait">0</span>
+          <span class="score-lbl">Your score</span>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- ── PLAYER GAME ── -->
-  <div class="screen" id="player-game">
-    <div class="timer-bar-wrap" style="margin-bottom:20px">
-      <div class="timer-bar-fill" id="playerTimerBar" style="width:100%"></div>
+  
+<!-- ════ PLAYER GAME ════ -->
+  <div class="screen" id="player-game" style="width:100%">
+    <div class="timer-wrap" style="margin-bottom:14px"><div class="timer-fill" id="playerTimerBar" style="width:100%"></div></div>
+
+    <!-- Question post card -->
+    <div class="post-card" id="playerPostCard" style="margin-bottom:14px">
+      <div class="post-header">
+        <div class="post-avatar" id="playerAvatar">💬</div>
+        <div><div class="post-handle" id="playerHandle">@scene</div></div>
+        <div class="post-time">now</div>
+      </div>
+      <div class="post-body">
+        <div class="pq-text" id="playerQText">—</div>
+      </div>
     </div>
-    <div class="player-question" id="playerQText">—</div>
-    <div class="player-options" id="playerOptions"></div>
-    <!-- Boss question input -->
-    <div id="bossInputWrap" style="display:none;width:100%;margin-bottom:16px">
-      <input type="text" id="bossInput" placeholder="Type your answer…"
-        style="text-transform:none;letter-spacing:0;font-size:18px;margin-bottom:8px;"
+
+    <!-- Standard MCQ -->
+    <div class="p-opts" id="playerOptions"></div>
+
+    <!-- Binary -->
+    <div class="swipe-area" id="swipeArea" style="display:none">
+      <button class="swipe-btn swipe-pp" id="swipePP" onclick="submitSwipe('pp',this)">Present<br>Perfect</button>
+      <button class="swipe-btn swipe-ps" id="swipePS" onclick="submitSwipe('ps',this)">Past<br>Simple</button>
+    </div>
+
+    <!-- Sort wrap reserved -->
+    <div id="sortWrap" style="display:none"></div>
+
+    <!-- Boss input -->
+    <div id="boss-input-wrap" style="display:none;width:100%;margin-bottom:14px">
+      <div class="boss-card">🔔 Boss question — type your answer</div>
+      <input type="text" id="bossInput" placeholder="Type your answer…" autocomplete="off" autocorrect="off"
         onkeydown="if(event.key==='Enter')submitBossAnswer()">
-      <button class="btn-primary" onclick="submitBossAnswer()" style="margin-bottom:0">Submit</button>
-      <div id="bossHint" style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin-top:8px;letter-spacing:0.08em"></div>
+      <div id="bossHint" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:10px;letter-spacing:0.06em"></div>
+      <button class="btn btn-accent" onclick="submitBossAnswer()" style="margin-bottom:0">Submit →</button>
     </div>
-    <div class="player-feedback" id="playerFeedback"></div>
-    <div style="display:flex;gap:24px;align-items:center;justify-content:center;margin-top:8px">
-      <div style="text-align:center">
-        <div class="player-score-label">Score</div>
-        <div class="player-score-display" id="playerScore">0</div>
-      </div>
-      <div style="text-align:center">
-        <div class="player-score-label">Streak</div>
-        <div class="player-score-display" id="playerStreak" style="color:var(--rc)">0</div>
-      </div>
+
+    <!-- Justify tiles -->
+    <div id="justifyWrap" style="display:none;width:100%">
+      <div class="justify-label">Why? Choose a reason:</div>
+      <div class="justify-tiles" id="justifyTiles"></div>
+    </div>
+
+    <div class="pfeedback" id="playerFeedback"></div>
+
+    <div class="score-strip">
+      <div class="score-item"><span class="score-val" id="playerScore">0</span><span class="score-lbl">Score</span></div>
+      <div class="score-item"><span class="score-val" id="playerStreak" style="color:var(--rc)">0</span><span class="score-lbl">Streak</span></div>
     </div>
   </div>
 
-  <!-- ── END SCREEN ── -->
-  <div class="screen" id="end">
-    <div class="end-grade" id="endGrade">🏆</div>
-    <div class="end-subtitle" id="endSubtitle">Game over</div>
-    <div class="final-lb">
-      <div class="final-lb-title">Final scores</div>
-      <div id="finalLeaderboard"></div>
+  
+<!-- ════ SOLO ROUND SCREEN ════ -->
+  <div class="screen" id="s-round-screen">
+    <div class="rt-hero" id="s-roundHero">
+      <div class="rt-round-num" id="s-roundNum">Round 01 / 05</div>
+      <div class="rt-name" id="s-roundName">Fill the <em>Gap</em></div>
+      <div class="rt-mechanic" id="s-roundMechanic"></div>
     </div>
-    <button class="btn-primary" onclick="location.reload()">Play again</button>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       SOLO MODE SCREENS
-       ══════════════════════════════════════ -->
-
-  <!-- Solo round transition -->
-  <div class="screen" id="s-round-screen" style="text-align:center">
-    <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:12px" id="s-roundBig">Round 01 / 04</div>
-    <h2 style="font-size:clamp(36px,8vw,56px);font-weight:800;letter-spacing:-0.03em;margin-bottom:8px;color:var(--rc)" id="s-roundTitleBig"></h2>
-    <div style="background:var(--rc-dim);border:1px solid var(--rc-border);border-left:4px solid var(--rc);padding:16px 20px;margin:24px 0 32px;text-align:left;font-size:14px;color:var(--mid);line-height:1.6;width:100%;border-radius:2px" id="s-roundRule"></div>
-    <button class="btn-primary" onclick="sBeginRound()">Let's go →</button>
-    <button class="btn-ghost" onclick="goTo('menu')">← Menu</button>
-  </div>
-
-  <!-- Solo game -->
-  <div class="screen" id="s-game-screen" style="width:100%">
-    <div style="width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--rc)" id="s-roundIndicator">Round 1 / 4</div>
-      <div style="display:flex;gap:6px;align-items:center" id="s-livesDisplay">
-        <div style="width:10px;height:10px;background:var(--red);border-radius:50%;transition:all 0.3s" id="s-life0"></div>
-        <div style="width:10px;height:10px;background:var(--red);border-radius:50%;transition:all 0.3s" id="s-life1"></div>
-        <div style="width:10px;height:10px;background:var(--red);border-radius:50%;transition:all 0.3s" id="s-life2"></div>
-      </div>
-      <div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700" id="s-scoreDisplay">0</div>
-    </div>
-    <div style="width:100%;height:2px;background:var(--border);margin-bottom:6px">
-      <div style="height:100%;background:var(--rc);transition:width 0.3s ease" id="s-progressFill"></div>
-    </div>
-    <div style="width:100%;height:3px;background:var(--border);margin-bottom:20px">
-      <div style="height:100%;background:var(--rc);transition:width 0.1s linear" id="s-timerBar"></div>
-    </div>
-    <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;align-self:flex-start" id="s-roundLabel"></div>
-    <div style="width:100%;background:var(--surface);border:1px solid var(--border);padding:32px 28px;margin-bottom:20px;position:relative;overflow:hidden;min-height:120px;display:flex;flex-direction:column;justify-content:center" id="s-questionCard">
-      <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px" id="s-questionContext"></div>
-      <div style="font-size:clamp(20px,4vw,28px);font-weight:700;line-height:1.3;letter-spacing:-0.01em" id="s-questionText"></div>
-      <div style="margin-top:12px;font-family:'Space Mono',monospace;font-size:12px;min-height:20px" id="s-feedbackRow"></div>
-    </div>
-    <div style="width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:24px" id="s-optionsGrid"></div>
-    <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;align-self:flex-end">
-      Streak: <span style="color:var(--rc);font-weight:700" id="s-streakNum">0</span>
+    <div class="rt-body">
+      <div class="rt-rule-card" id="s-roundRule"></div>
+      <button class="btn btn-accent" onclick="sBeginRound()">Let's go →</button>
+      <button class="btn-ghost" onclick="goTo('menu')">← Menu</button>
     </div>
   </div>
 
-  <!-- Solo end -->
-  <div class="screen" id="s-end-screen" style="text-align:center">
-    <div style="font-size:clamp(80px,18vw,112px);font-weight:800;line-height:1;letter-spacing:-0.05em;margin-bottom:4px" id="s-endGrade"></div>
-    <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:32px" id="s-endLabel"></div>
-    <div style="width:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:32px">
-      <div style="background:var(--surface);border:1px solid var(--border);padding:14px 10px;text-align:center">
-        <span style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--accent);display:block;margin-bottom:4px" id="s-finalScore">0</span>
-        <span style="font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase">Score</span>
+  
+<!-- ════ SOLO GAME ════ -->
+  <div class="screen" id="s-game-screen" style="width:100%;padding:0">
+    <div class="solo-header">
+      <div class="round-tag" id="s-roundIndicator" style="font-size:11px;font-weight:800;padding:5px 12px">Round 1 / 5</div>
+      <div class="lives-row" id="s-livesDisplay">
+        <div class="bar b1" id="s-bar0"></div>
+        <div class="bar b2" id="s-bar1"></div>
+        <div class="bar b3" id="s-bar2"></div>
       </div>
-      <div style="background:var(--surface);border:1px solid var(--border);padding:14px 10px;text-align:center">
-        <span style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--accent);display:block;margin-bottom:4px" id="s-finalCorrect">0</span>
-        <span style="font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase">Correct</span>
+      <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:22px;color:var(--rc);letter-spacing:-0.02em" id="s-scoreDisplay">0</div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="s-progressFill" style="width:0%"></div></div>
+    <div class="timer-wrap" style="margin-bottom:16px"><div class="timer-fill" id="s-timerBar" style="width:100%"></div></div>
+
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;align-self:flex-start" id="s-roundLabel"></div>
+
+    <!-- Question as post card -->
+    <div class="post-card" id="s-qcard" style="margin-bottom:14px">
+      <div class="post-header">
+        <div class="post-avatar" id="s-avatar">💬</div>
+        <div><div class="post-handle" id="s-handle">@scene</div></div>
+        <div class="post-time">now</div>
       </div>
-      <div style="background:var(--surface);border:1px solid var(--border);padding:14px 10px;text-align:center">
-        <span style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--accent);display:block;margin-bottom:4px" id="s-finalStreak">0</span>
-        <span style="font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase">Best streak</span>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);padding:14px 10px;text-align:center">
-        <span style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--accent);display:block;margin-bottom:4px" id="s-finalRounds">0</span>
-        <span style="font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase">Rounds</span>
+      <div class="post-body">
+        <div class="post-context" id="s-qCtx"></div>
+        <div class="post-text" id="s-qText"></div>
+        <div style="font-family:'Inter',sans-serif;font-size:13px;min-height:18px;margin-top:10px;font-weight:500" id="s-feedbackRow"></div>
       </div>
     </div>
-    <p style="font-size:15px;color:var(--mid);line-height:1.7;margin-bottom:32px;max-width:380px" id="s-endMessage"></p>
-    <button class="btn-primary" onclick="startSolo()">Play again</button>
-    <button class="btn-ghost" onclick="goTo('menu')" style="margin-top:8px">← Menu</button>
+
+    <div id="s-optionsArea" style="width:100%"></div>
+
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;align-self:flex-end;margin-top:8px">
+      Streak <span style="color:var(--rc);font-weight:700" id="s-streakNum">0</span>
+    </div>
   </div>
+
+  
+<!-- ════ SOLO END ════ -->
+  <div class="screen" id="s-end-screen" style="text-align:center;padding:40px 16px 0">
+    <div class="end-grade" id="s-endGrade" style="margin-top:20px">S</div>
+    <div class="end-sub" id="s-endLabel">Fluent</div>
+    <div class="stat-grid">
+      <div class="stat-cell"><span class="stat-val" id="s-finalScore">0</span><span class="stat-lbl">Score</span></div>
+      <div class="stat-cell"><span class="stat-val" id="s-finalCorrect">0</span><span class="stat-lbl">Correct</span></div>
+      <div class="stat-cell"><span class="stat-val" id="s-finalStreak">0</span><span class="stat-lbl">Streak</span></div>
+      <div class="stat-cell"><span class="stat-val" id="s-finalRounds">0</span><span class="stat-lbl">Rounds</span></div>
+    </div>
+    <div class="ach-row" id="s-achievements"></div>
+    <div class="grammar-insight" id="s-grammarInsight" style="display:none">
+      <div class="gi-label">Grammar insight</div>
+      <div class="gi-text" id="s-insightText"></div>
+    </div>
+    <div class="end-message" id="s-endMessage"></div>
+    <div style="padding:0 16px;width:100%"><button class="btn btn-accent" onclick="startSolo()">Play again</button></div>
+    <button class="btn-ghost" onclick="goTo('menu')" style="margin-top:4px">← Menu</button>
+  </div>
+
+
 
 </div><!-- /wrap -->
 
 <script>
+"use strict";
+
+
 'use strict';
 
-// ═══════════════════════════════════════
+// HTML escape
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+
+// ═══════════════════════
 // FIREBASE
-// ═══════════════════════════════════════
+// ═══════════════════════
 const firebaseConfig = {
   apiKey: "AIzaSyDEkPv2FR8ktOvz1ERkUkBOb5uy5EnMABM",
   authDomain: "signal-game-a17da.firebaseapp.com",
@@ -786,943 +504,1374 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ═══════════════════════════════════════
-// QUESTION BANK — Unit 4 Present Progressive
-// ═══════════════════════════════════════
-const ALL_QUESTIONS = [
-  // ROUND 1 — Be form (level 1)
-  { round:1, level:1, context:'One person', text:'She ___ running in the park.', answer:'is', options:['is','are','am','be'] },
-  { round:1, level:1, context:'Two people', text:'They ___ eating lunch.', answer:'are', options:['are','is','am','be'] },
-  { round:1, level:1, context:'Talking about yourself', text:'I ___ listening to music.', answer:'am', options:['am','is','are','be'] },
-  { round:1, level:1, context:'One person', text:'He ___ watching a film.', answer:'is', options:['is','are','am','were'] },
-  { round:1, level:1, context:'A group', text:'We ___ playing football.', answer:'are', options:['are','is','am','be'] },
-  { round:1, level:1, context:'One thing', text:'The dog ___ sleeping on the sofa.', answer:'is', options:['is','are','am','be'] },
-  { round:1, level:1, context:'You and a friend', text:'You ___ making a lot of noise.', answer:'are', options:['are','is','am','be'] },
-  { round:1, level:1, context:'A woman', text:'Mrs Malady ___ opening the door.', answer:'is', options:['is','are','am','be'] },
-  { round:1, level:1, context:'Two things', text:'The machines ___ moving.', answer:'are', options:['are','is','am','be'] },
-  { round:1, level:1, context:'Talking about yourself', text:'I ___ waiting for Noah.', answer:'am', options:['am','is','are','be'] },
-  // ROUND 2 — Spelling (level 2)
-  { round:2, level:2, context:'Group 1: just add -ing', text:'She is ___ a song.', answer:'singing', options:['singing','singeing','singingg','sings'] },
-  { round:2, level:2, context:'Group 2: drop the e', text:'He is ___ behind the post box.', answer:'hiding', options:['hiding','hideing','hididng','hidings'] },
-  { round:2, level:2, context:'Group 3: double the consonant', text:'They are ___ in the sea.', answer:'swimming', options:['swimming','swiming','swimmingg','swimeing'] },
-  { round:2, level:2, context:'Group 2: drop the e', text:'She is ___ a cake.', answer:'making', options:['making','makeing','macking','makking'] },
-  { round:2, level:2, context:'Group 3: double the consonant', text:'Noah is ___ after Buddy.', answer:'running', options:['running','runing','runeing','runns'] },
-  { round:2, level:2, context:'Group 1: just add -ing', text:'The children are ___ a book.', answer:'reading', options:['reading','readding','readeing','reads'] },
-  { round:2, level:2, context:'Group 3: double the consonant', text:'He is ___ to Alice.', answer:'chatting', options:['chatting','chating','chatteing','chats'] },
-  { round:2, level:2, context:'Group 2: drop the e', text:'They are ___ the problem.', answer:'deciding', options:['deciding','decideing','decid-ing','decidding'] },
-  { round:2, level:2, context:'Group 1: just add -ing', text:'I am ___ for my phone.', answer:'looking', options:['looking','lookking','lookeing','looks'] },
-  { round:2, level:2, context:'Group 3: double the consonant', text:'She is ___ on the chair.', answer:'sitting', options:['sitting','siting','sitteing','sits'] },
-  // ROUND 3 — Positive / Negative (level 3)
-  { round:3, level:3, context:'She picks up a sandwich.', text:'She ___ drinking water.', answer:"isn't", options:["isn't",'is',"aren't",'am not'] },
-  { round:3, level:3, context:'Everyone at the party is smiling.', text:'They ___ having fun.', answer:'are', options:['are',"aren't","isn't",'am not'] },
-  { round:3, level:3, context:'He sits down with a book and opens it.', text:'He ___ reading his book.', answer:'is', options:['is',"isn't","aren't",'am not'] },
-  { round:3, level:3, context:'The beach is very loud this morning.', text:'The seagulls ___ making a lot of noise.', answer:'are', options:['are',"aren't","isn't",'am not'] },
-  { round:3, level:3, context:'Two kids sit on the grass watching the others.', text:'Some kids ___ playing frisbee.', answer:"aren't", options:["aren't",'are',"isn't",'am not'] },
-  { round:3, level:3, context:'I put the chips down and walk away.', text:'I am ___ eating chips.', answer:'not', options:['not','still','also','very'] },
-  { round:3, level:3, context:'Noah stands completely still, eyes down.', text:'Noah ___ saying anything.', answer:"isn't", options:["isn't",'is',"aren't",'am not'] },
-  { round:3, level:3, context:'Zane and Lily arrive at the café door.', text:'They ___ waiting at the café.', answer:'are', options:['are',"aren't","isn't",'am not'] },
-  { round:3, level:3, context:'Mrs Malady slams the door and shouts.', text:'Mrs Malady ___ laughing.', answer:"isn't", options:["isn't",'is',"aren't",'am not'] },
-  { round:3, level:3, context:"Hugo's eyes are black. He doesn't move.", text:'Hugo ___ talking.', answer:"isn't", options:["isn't",'is',"aren't",'am not'] },
-  // ROUND 4 — Now or Always (level 4)
-  { round:4, level:4, context:'Right now — at this moment', text:'Look! She ___ a selfie.', answer:'is taking', options:['is taking','takes','take','taking'] },
-  { round:4, level:4, context:'Every day — a habit', text:'He usually ___ lunch at school.', answer:'has', options:['has','is having','having','have'] },
-  { round:4, level:4, context:'At this moment', text:'They ___ football right now.', answer:'are playing', options:['are playing','play','plays','playing'] },
-  { round:4, level:4, context:'Always — a routine', text:'She always ___ her teeth before bed.', answer:'brushes', options:['brushes','is brushing','brush','brushing'] },
-  { round:4, level:4, context:'At this moment', text:"The dog ___ right now — it's very loud.", answer:'is barking', options:['is barking','barks','bark','barking'] },
-  { round:4, level:4, context:'A general fact', text:'Noah never ___ Alice first.', answer:'texts', options:['texts','is texting','text','texting'] },
-  { round:4, level:4, context:'Right now', text:'Wait — someone ___ the door.', answer:'is opening', options:['is opening','opens','open','opening'] },
-  { round:4, level:4, context:'Every Sunday — a routine', text:'We usually ___ fish and chips on Sundays.', answer:'eat', options:['eat','are eating','eating','eats'] },
-  { round:4, level:4, context:'At this moment', text:'Look at Zane. He ___ to Lily!', answer:'is talking', options:['is talking','talks','talk','talking'] },
-  { round:4, level:4, context:'A habit', text:'She often ___ her hair in the morning.', answer:'dries', options:['dries','is drying','dry','drying'] },
-];
+// Init called per-file
 
-// BOSS QUESTIONS — free type, worth 20 pts
-const BOSS_QUESTIONS = [
-  { context:'Complete the sentence', text:'She ___ (hide) behind the post box.', answer:'is hiding', hint:'is + hiding' },
-  { context:'Complete the sentence', text:'They ___ (run) in the park right now.', answer:'are running', hint:'are + running' },
-  { context:'Complete the sentence', text:'I ___ (not/eat) — I hate fish and chips.', answer:"am not eating", hint:"am not eating" },
-  { context:'Make it negative', text:'She is singing. → She ___ singing.', answer:"isn't", hint:"isn't" },
-  { context:'Complete the sentence', text:'Noah ___ (swim) — the water is too cold.', answer:"isn't swimming", hint:"isn't swimming" },
-  { context:'Now or always?', text:'Look! The dog ___ (bark) at the seagulls.', answer:'is barking', hint:'is barking' },
-  { context:'Complete the sentence', text:'We ___ (not/play) — we are watching.', answer:"aren't playing", hint:"aren't playing" },
-  { context:'Make it negative', text:'They are talking. → They ___ talking.', answer:"aren't", hint:"aren't" },
-];
-
-const ROUND_COLORS = {
-  1: { rc:'#f97316', dim:'rgba(249,115,22,0.15)', border:'rgba(249,115,22,0.4)' },
-  2: { rc:'#a855f7', dim:'rgba(168,85,247,0.15)', border:'rgba(168,85,247,0.4)' },
-  3: { rc:'#06b6d4', dim:'rgba(6,182,212,0.15)',  border:'rgba(6,182,212,0.4)'  },
-  4: { rc:'#ec4899', dim:'rgba(236,72,153,0.15)', border:'rgba(236,72,153,0.4)' },
+// ═══════════════════════
+// ROUND CONFIG
+// ═══════════════════════
+const ROUND_CONFIG = {
+  1: { name:'Fill the Gap',       mechanic:'No clues. Read the situation.',    rc:'#FE2C55', dim:'rgba(254,44,85,0.12)',   border:'rgba(254,44,85,0.4)',   avatar:'📱', handle:'@situation' },
+  2: { name:'Perfect or Simple?', mechanic:'One sentence. Two choices.',        rc:'#FF9900', dim:'rgba(255,153,0,0.12)',   border:'rgba(255,153,0,0.4)',   avatar:'🔍', handle:'@classify'  },
+  3: { name:'Context Clash',      mechanic:'Both fit grammar. One fits life.',  rc:'#A259FF', dim:'rgba(162,89,255,0.12)', border:'rgba(162,89,255,0.4)',   avatar:'⚡', handle:'@context'   },
+  4: { name:'Justify It',         mechanic:'Right answer. Right reason.',       rc:'#25D366', dim:'rgba(37,211,102,0.12)', border:'rgba(37,211,102,0.4)',   avatar:'🧠', handle:'@justify'   },
+  5: { name:'No Labels',          mechanic:'No grammar. Just language.',        rc:'#00B4D8', dim:'rgba(0,180,216,0.12)',  border:'rgba(0,180,216,0.4)',    avatar:'💬', handle:'@real'      },
+  boss:{ name:'Boss',             mechanic:'Something different.',              rc:'#FE2C55', dim:'rgba(254,44,85,0.12)',  border:'rgba(254,44,85,0.4)',    avatar:'🔔', handle:'@boss'      },
 };
 
-const ROUND_NAMES = { 1:'Be + -ing', 2:'Spelling', 3:'Positive / Negative', 4:'Now or Always?' };
-
 function setRoundColor(r) {
-  const c = ROUND_COLORS[r] || ROUND_COLORS[1];
+  const c = ROUND_CONFIG[r] || ROUND_CONFIG[1];
   const root = document.documentElement;
   root.style.setProperty('--rc', c.rc);
   root.style.setProperty('--rc-dim', c.dim);
   root.style.setProperty('--rc-border', c.border);
+  document.body.setAttribute('data-round', r);
 }
 
+function setPostAvatar(cardAvatarId, handleId, round) {
+  const c = ROUND_CONFIG[round] || ROUND_CONFIG[1];
+  const av = document.getElementById(cardAvatarId);
+  const hd = document.getElementById(handleId);
+  if (av) { av.textContent = c.avatar; av.style.background = c.dim; av.style.borderColor = c.border; }
+  if (hd) hd.textContent = c.handle;
+}
+
+// ═══════════════════════
+// QUESTION BANK — Gen Z/Alpha world, age 10/11
+// ═══════════════════════
+
+// ROUND 1: Fill the Gap — scene-based, no time-marker giveaways
+const R1_QUESTIONS = [
+  { context:"Zara opens TikTok and scrolls. She can't stop.", text:"She ___ on her phone for two hours — the battery is almost dead.", answer:"has been", options:["has been","was","is","went"] },
+  { context:"Breaking notification on everyone's screen.", text:"TikTok ___ the news — it's all anyone is talking about.", answer:"has broken", options:["has broken","broke","breaks","is breaking"] },
+  { context:"A teacher holds up a Chromebook with a cracked screen.", text:"Someone ___ this laptop — does anyone know what happened?", answer:"has broken", options:["has broken","broke","breaks","is breaking"] },
+  { context:"Mia's group chat is going wild. Nobody's replied to her.", text:"She ___ fifteen messages — still no reply.", answer:"has sent", options:["has sent","sent","sends","was sending"] },
+  { context:"Year 6 history. The teacher asks what students remember.", text:"We ___ about this last term — does anyone remember?", answer:"learned", options:["learned","have learned","learn","were learning"] },
+  { context:"Kai gets home. His mum looks worried at the door.", text:"Where ___ you ___? You were supposed to be back at four.", answer:"have / been", options:["have / been","did / go","were / going","are / being"] },
+  { context:"A notification pops up: 'New comment on your post.'", text:"Someone ___ your photo — they say it's fire.", answer:"liked", options:["liked","has liked","likes","is liking"] },
+  { context:"The Wi-Fi goes down mid-lesson. Everyone groans.", text:"The connection ___ — we'll have to restart everything.", answer:"has dropped", options:["has dropped","dropped","drops","was dropping"] },
+  { context:"Jada opens YouTube. The video she was watching is gone.", text:"The creator ___ the video — it's not there anymore.", answer:"has deleted", options:["has deleted","deleted","deletes","was deleting"] },
+  { context:"An old friend messages you out of nowhere.", text:"I ___ you ages — how are you?", answer:"haven't seen", options:["haven't seen","didn't see","don't see","wasn't seeing"] },
+  { context:"Leo holds up his phone. The screen is black.", text:"My phone ___  — I can't turn it on.", answer:"has died", options:["has died","died","dies","was dying"] },
+  { context:"The teacher checks the register. One seat is empty.", text:"Has anyone ___ where Sam is?", answer:"seen", options:["seen","saw","see","been seeing"] },
+  { context:"Everyone is using a new word that appeared last week.", text:"That word ___ everywhere on social media.", answer:"has spread", options:["has spread","spread","spreads","was spreading"] },
+  { context:"Priya shows her drawing to the class.", text:"She ___ on this all weekend — you can tell.", answer:"worked", options:["worked","has worked","works","was working"] },
+  { context:"A news alert flashes across the screen mid-lesson.", text:"Scientists ___ a new planet — it was on the news just now.", answer:"have discovered", options:["have discovered","discovered","discover","were discovering"] },
+];
+
+// ROUND 2: Binary — Present Perfect or Past Simple?
+const R2_QUESTIONS = [
+  { context:"", text:"She has been on TikTok for three hours.", answer:"pp" },
+  { context:"", text:"He lost his phone on the bus yesterday.", answer:"ps" },
+  { context:"", text:"I've never seen that meme before.", answer:"pp" },
+  { context:"", text:"They finished the game at midnight.", answer:"ps" },
+  { context:"", text:"Have you ever been to a concert?", answer:"pp" },
+  { context:"", text:"We watched that video in class on Monday.", answer:"ps" },
+  { context:"", text:"She's already replied to the message.", answer:"pp" },
+  { context:"", text:"He broke his arm in football training last week.", answer:"ps" },
+  { context:"", text:"I've just seen the notification.", answer:"pp" },
+  { context:"", text:"We made a TikTok in the park on Saturday.", answer:"ps" },
+  { context:"", text:"The app has crashed again.", answer:"pp" },
+  { context:"", text:"Did you enjoy the school trip last month?", answer:"ps" },
+  { context:"", text:"She has been learning guitar since January.", answer:"pp" },
+  { context:"", text:"I played Minecraft for six hours last Saturday.", answer:"ps" },
+  { context:"", text:"Has anyone seen the new Minecraft update?", answer:"pp" },
+];
+
+// ROUND 3: Context Clash — both grammatically correct, one fits the moment
+const R3_QUESTIONS = [
+  {
+    context:"Jayden drops his phone and picks it up. The screen is cracked. He shows everyone.",
+    text:"What does Jayden say?",
+    options:["I cracked my screen.","I've cracked my screen."],
+    answer:1,
+    explanation:"The cracked screen is right there, visible, relevant now — Present Perfect."
+  },
+  {
+    context:"Two friends talk about a game they both played when they were younger.",
+    text:"Which sentence fits this conversation?",
+    options:["I played Minecraft every day.","I've played Minecraft every day."],
+    answer:0,
+    explanation:"They're describing a closed past habit — that time is finished. Past Simple."
+  },
+  {
+    context:"A teacher asks: 'Why do you want to join the art club?'",
+    text:"Which answer fits?",
+    options:["I drew since I was five.","I've drawn since I was five."],
+    answer:1,
+    explanation:"The drawing continues up to now — 'since' with an unfinished period needs Present Perfect."
+  },
+  {
+    context:"Breaking notification on the school news app right now.",
+    text:"Which headline fits a live news notification?",
+    options:["The school won the regional competition.","The school has won the regional competition."],
+    answer:1,
+    explanation:"It just happened and is currently relevant — news in the present moment uses Present Perfect."
+  },
+  {
+    context:"Friends talking about a school trip from two years ago.",
+    text:"Which sentence fits this memory chat?",
+    options:["That trip was so good.","That trip has been so good."],
+    answer:0,
+    explanation:"Two years ago is a closed, finished time. Past Simple."
+  },
+  {
+    context:"Sofia's mum asks: 'Have you done your homework?' Sofia is still sitting at her desk, looking stressed.",
+    text:"What does Sofia say?",
+    options:["I didn't finish it yet.","I haven't finished it yet."],
+    answer:1,
+    explanation:"'Yet' signals an unfinished time up to now — Present Perfect."
+  },
+  {
+    context:"The app has just sent everyone a notification. Your phone buzzes.",
+    text:"Which sentence fits what you'd say to a friend right now?",
+    options:["Did you see the notification?","Have you seen the notification?"],
+    answer:1,
+    explanation:"It just happened, still current, still relevant — Present Perfect."
+  },
+  {
+    context:"Discussing a film that came out three years ago.",
+    text:"Which question fits?",
+    options:["Have you ever seen it?","Did you ever see it?"],
+    answer:0,
+    explanation:"'Ever' asking about life experience up to now = Present Perfect."
+  },
+  {
+    context:"A YouTuber posted a video 4 days ago. You're recommending it to a friend today.",
+    text:"Which sentence fits?",
+    options:["They posted an amazing video.","They've posted an amazing video."],
+    answer:1,
+    explanation:"It's recent and still up, still watchable, still relevant — Present Perfect."
+  },
+  {
+    context:"You're explaining why you look tired. You got no sleep because of a late-night gaming session.",
+    text:"What do you say?",
+    options:["I stayed up until 3am.","I've stayed up until 3am."],
+    answer:0,
+    explanation:"3am last night is a specific closed past time. Past Simple."
+  },
+];
+
+// ROUND 4: Justify It
+const R4_QUESTIONS = [
+  {
+    context:"Theo shows everyone his new trainers.", text:"He ___ a new pair of Nikes.", answer:"has bought",
+    options:["has bought","bought"],
+    justifyOptions:["He bought them a long time ago","The trainers are on his feet right now — still relevant","It was a specific moment in the past","I know exactly when he bought them"],
+    correctJustify:1,
+    explanation:"He's wearing them right now — the purchase is present and visible."
+  },
+  {
+    context:"Class is discussing a book they read in Year 5.", text:"We ___ that book in primary school.", answer:"read",
+    options:["read","have read"],
+    justifyOptions:["Primary school is a finished period of my life — that chapter is closed","The learning is still happening now","No specific time is mentioned so PP is needed","Primary school is recent enough to use Present Perfect"],
+    correctJustify:0,
+    explanation:"Primary school is a closed, finished chapter of life — Past Simple."
+  },
+  {
+    context:"Amara's bag is open. Her pencil case isn't there.", text:"I ___ my pencil case — it's not in my bag.", answer:"have lost",
+    options:["have lost","lost"],
+    justifyOptions:["I know exactly when I lost it","I found it later","It's still missing right now — that's the problem","It happened a very long time ago"],
+    correctJustify:2,
+    explanation:"Still missing, still matters — present consequence."
+  },
+  {
+    context:"Someone asks why you know so much about space.", text:"I ___ about space for years — I love it.", answer:"have been reading",
+    options:["have been reading","read"],
+    justifyOptions:["The reading stopped years ago — it's finished","I still read about it now — it's an ongoing interest","No specific time is named — it's indefinite","There's a specific date mentioned"],
+    correctJustify:1,
+    explanation:"The interest continues to now AND no specific time is named — both point to Present Perfect."
+  },
+  {
+    context:"A journalist asks a footballer: 'When did you score your first goal?'", text:"I ___ my first goal in 2019, in a local cup match.", answer:"scored",
+    options:["scored","have scored"],
+    justifyOptions:["The goal is still happening right now","2019 is a specific, closed past time — the event is done","The goal is still relevant because they're still a footballer","No specific time is mentioned so it could be PP"],
+    correctJustify:1,
+    explanation:"A specific year (2019) closes the time — Past Simple required even if the result feels relevant."
+  },
+  {
+    context:"Your friend asks if you've tried a new food place.", text:"___ you ever ___ Korean food?", answer:"Have / tried",
+    options:["Have / tried","Did / try"],
+    justifyOptions:["I'm asking about a specific day","I'm asking about their whole life experience up to now","I know they tried it last week","They mentioned it before"],
+    correctJustify:1,
+    explanation:"'Ever' = life experience up to now = Present Perfect."
+  },
+  {
+    context:"You arrive at school and see your friend's hand bandaged up.", text:"What ___ to your hand?", answer:"has happened",
+    options:["has happened","happened"],
+    justifyOptions:["The injury is old news — it happened long ago","The bandage is right there — the consequence is visible NOW","I know exactly when it happened — that makes it Past Simple","The news is recent but I know no specific time"],
+    correctJustify:1,
+    explanation:"Visible present consequence — the injury is still affecting them. That's what PP expresses."
+  },
+  {
+    context:"The teacher asks the class to remember something from a previous lesson.", text:"We ___ this last lesson — it was on the board.", answer:"did",
+    options:["did","have done"],
+    justifyOptions:["Last lesson is a specific closed past event","We're still doing it now","No specific time is mentioned","The result is relevant now"],
+    correctJustify:0,
+    explanation:"'Last lesson' is a specific finished time — Past Simple."
+  },
+];
+
+// ═══════════════════════
+// BOSS QUESTIONS — three types: court, detective, impossible
+// ═══════════════════════
+
+// Grammar Court: two answers shown, one wrong. Tap the wrong one, then tap why.
+const BOSS_COURT = [
+  {
+    bossType:"court",
+    scenario:"The teacher asks: 'Why are you late?' Two students answer.",
+    answers:[
+      { name:"Raya", text:"Sorry — I've missed the bus this morning." },
+      { name:"Luca", text:"Sorry — I missed the bus this morning." }
+    ],
+    wrongIdx:0,
+    whyOptions:[
+      "'this morning' is a specific finished time — Past Simple needed",
+      "Raya is being too polite",
+      "Present Perfect can never follow 'sorry'",
+      "Luca used the wrong subject"
+    ],
+    correctWhy:0,
+    explanation:"'This morning' names a specific closed past time. Present Perfect is incompatible."
+  },
+  {
+    bossType:"court",
+    scenario:"Two people describe the same broken laptop.",
+    answers:[
+      { name:"Zoe", text:"Someone has broken this laptop yesterday." },
+      { name:"Finn", text:"Someone broke this laptop yesterday." }
+    ],
+    wrongIdx:0,
+    whyOptions:[
+      "You cannot use 'has broken' — it sounds wrong",
+      "'Yesterday' is a specific finished time — Present Perfect is impossible with it",
+      "Finn forgot to use Present Perfect",
+      "The laptop is still broken so Zoe is right"
+    ],
+    correctWhy:1,
+    explanation:"Present Perfect is impossible with a specific finished time like 'yesterday'."
+  },
+  {
+    bossType:"court",
+    scenario:"A friend asks if you saw a film. Two replies.",
+    answers:[
+      { name:"Ali", text:"Yes, I saw it last Friday." },
+      { name:"Mia", text:"Yes, I've seen it last Friday." }
+    ],
+    wrongIdx:1,
+    whyOptions:[
+      "Mia should have used 'watched' not 'seen'",
+      "'Last Friday' closes the time — Present Perfect can't be used with it",
+      "Ali's answer is too short",
+      "Present Perfect is wrong after 'Yes'"
+    ],
+    correctWhy:1,
+    explanation:"'Last Friday' = specific closed past time. You must switch to Past Simple."
+  },
+  {
+    bossType:"court",
+    scenario:"Two students explain why they know a lot about climate change.",
+    answers:[
+      { name:"Priya", text:"I read about it for years — I'm really into it." },
+      { name:"Omar", text:"I've read about it for years — I'm really into it." }
+    ],
+    wrongIdx:0,
+    whyOptions:[
+      "Priya used the wrong verb",
+      "The interest continues to now — Past Simple cuts it off too early",
+      "Omar's sentence is too long",
+      "'For years' always needs Past Simple"
+    ],
+    correctWhy:1,
+    explanation:"The reading is ongoing up to the present — Past Simple closes it too early."
+  },
+];
+
+// Feed Detective: a sequence of posts. Students answer one question about the sequence.
+const BOSS_DETECTIVE = [
+  {
+    bossType:"detective",
+    intro:"Three posts. Same event — different moments.",
+    posts:[
+      { handle:"@jayden_g", time:"2 mins ago", text:"My phone has just died lol" },
+      { handle:"@jayden_g", time:"Yesterday", text:"I dropped my phone on the bus" },
+      { handle:"@jayden_g", time:"3 days ago", text:"Has anyone tried this new charging cable?" }
+    ],
+    question:"Which post shows Jayden reacting to something that JUST happened and is still relevant RIGHT NOW?",
+    options:["Post 1 — 'My phone has just died'","Post 2 — 'I dropped my phone'","Post 3 — 'Has anyone tried...'","All three — they're all relevant now"],
+    answer:0,
+    explanation:"'Has just died' = Present Perfect. The phone is dead right now. Post 2 used Past Simple because it happened yesterday — closed. Post 3 is a question about experience, not a reaction."
+  },
+  {
+    bossType:"detective",
+    intro:"Amara's feed. Something went wrong.",
+    posts:[
+      { handle:"@amara.does.art", time:"now", text:"I've lost my sketchbook — has anyone seen it??" },
+      { handle:"@amara.does.art", time:"Last week", text:"I finished my biggest drawing yet 🎨" },
+      { handle:"@amara.does.art", time:"2 years ago", text:"I started drawing when I was in Year 4" }
+    ],
+    question:"Which post uses Past Simple because the event happened at a SPECIFIC FINISHED time?",
+    options:["Post 1 — 'I've lost my sketchbook'","Post 2 — 'I finished my biggest drawing'","Post 3 — 'I started drawing'","Posts 2 and 3"],
+    answer:3,
+    explanation:"Both Post 2 ('last week') and Post 3 ('when I was in Year 4') name specific finished times — Past Simple. Post 1 uses Present Perfect because the sketchbook is STILL missing."
+  },
+  {
+    bossType:"detective",
+    intro:"Three people react to the same news story.",
+    posts:[
+      { handle:"@news_bot", time:"Breaking", text:"Scientists have discovered a new species of frog 🐸" },
+      { handle:"@kai_reacts", time:"4 mins ago", text:"Wait — did they discover this today??" },
+      { handle:"@ms_chen_sci", time:"3 mins ago", text:"We covered this topic in class last year" }
+    ],
+    question:"Why does @news_bot use Present Perfect but @ms_chen_sci uses Past Simple?",
+    options:[
+      "The news is recent with no specific time named; the class happened at a specific past time",
+      "News always uses Present Perfect; teachers always use Past Simple",
+      "@ms_chen_sci made a grammar mistake",
+      "Both should use Present Perfect — it's the same information"
+    ],
+    answer:0,
+    explanation:"@news_bot uses PP because the discovery is recent and no specific time is named. @ms_chen_sci uses PS because 'last year' is a specific finished time."
+  },
+  {
+    bossType:"detective",
+    intro:"Sofia's posts. Something changed.",
+    posts:[
+      { handle:"@sofia.creates", time:"5 days ago", text:"I've been working on this project all week 💻" },
+      { handle:"@sofia.creates", time:"2 days ago", text:"I submitted the project yesterday — finally done" },
+      { handle:"@sofia.creates", time:"now", text:"They loved it. I've passed! 🎉" }
+    ],
+    question:"Post 1 uses Present Perfect Progressive. Post 2 switches to Past Simple. Why?",
+    options:[
+      "Post 2 is less exciting so it uses Past Simple",
+      "'Yesterday' names a specific finished moment — the submission is closed, done",
+      "Past Simple is always used for school work",
+      "Sofia made a mistake in Post 1"
+    ],
+    answer:1,
+    explanation:"'Yesterday' closes the time. The submission is a finished event with a specific past time — Past Simple. Post 1's work was still ongoing at that point — Present Perfect Progressive."
+  },
+];
+
+// Impossible Sentence: three sentences, one cannot exist. Tap it.
+const BOSS_IMPOSSIBLE = [
+  {
+    bossType:"impossible",
+    prompt:"One of these sentences is IMPOSSIBLE in English. Which one?",
+    sentences:[
+      "I've been to Paris three times.",
+      "I've visited Paris last summer.",
+      "I visited Paris last summer."
+    ],
+    answer:1,
+    explanation:"'Last summer' is a specific finished time. Present Perfect is impossible with it. You must say 'I visited Paris last summer.'"
+  },
+  {
+    bossType:"impossible",
+    prompt:"One of these sentences is IMPOSSIBLE in English. Which one?",
+    sentences:[
+      "She has taught here since 2015.",
+      "She taught here since 2015.",
+      "She taught here in 2015."
+    ],
+    answer:1,
+    explanation:"'Since' points to an unfinished time period — it needs Present Perfect. 'She taught here since 2015' is impossible. 'She taught here in 2015' is fine because 'in 2015' closes the time."
+  },
+  {
+    bossType:"impossible",
+    prompt:"One of these sentences is IMPOSSIBLE in English. Which one?",
+    sentences:[
+      "Did you ever try spicy food?",
+      "Have you ever tried spicy food?",
+      "Have you tried spicy food before?"
+    ],
+    answer:0,
+    explanation:"'Ever' with life experience needs Present Perfect. 'Did you ever try' is grammatically possible but sounds unnatural and is typically considered incorrect in standard English — 'Have you ever tried' is the correct form."
+  },
+  {
+    bossType:"impossible",
+    prompt:"One of these sentences is IMPOSSIBLE in English. Which one?",
+    sentences:[
+      "He has worked here for five years.",
+      "He worked here for five years.",
+      "He has worked here since five years."
+    ],
+    answer:2,
+    explanation:"'Since' needs a point in time ('since 2019', 'since January'). 'Since five years' is impossible — you need 'for five years' or 'since five years ago'."
+  },
+];
+
+// Combined pool — boss questions drawn alternately from all three types
+const BOSS_POOL = [
+  ...BOSS_COURT.map(q=>({...q,round:'boss',type:'boss'})),
+  ...BOSS_DETECTIVE.map(q=>({...q,round:'boss',type:'boss'})),
+  ...BOSS_IMPOSSIBLE.map(q=>({...q,round:'boss',type:'boss'})),
+];
+
+// Round 5 — No Labels: pure communication, no tense names anywhere
+const R5_QUESTIONS = [
+  {
+    context:"Sam shows you his broken phone. Screen completely shattered.",
+    text:"What do you say?",
+    options:["What happened?","What has happened?","What did happen?","What happens?"],
+    answer:1,
+    explanation:"You're reacting to a visible situation right now — the broken phone is in front of you. 'What has happened?' fits because the consequence is present."
+  },
+  {
+    context:"You haven't seen your friend in weeks. You bump into them in town.",
+    text:"What's the most natural thing to say?",
+    options:["Where did you go?","I didn't see you for ages!","I haven't seen you in ages!","Where have you been going?"],
+    answer:2,
+    explanation:"The gap in contact continues up to right now — 'I haven't seen you in ages' is the natural choice."
+  },
+  {
+    context:"The teacher walks in. The classroom is chaotic. Something clearly happened.",
+    text:"What does the teacher say?",
+    options:["What happened here?","What has happened here?","What did happen here?","What was happened here?"],
+    answer:1,
+    explanation:"The mess is visible and present — the teacher is reacting to the current state. 'What has happened?' connects the past event to the present chaos."
+  },
+  {
+    context:"You ask your friend about a film. You want to know if they've seen it at any point in their life.",
+    text:"Which question do you ask?",
+    options:["Did you see that film?","Have you seen that film?","Were you seeing that film?","Do you see that film?"],
+    answer:1,
+    explanation:"You're asking about life experience up to now — 'Have you seen it?' is the natural choice."
+  },
+  {
+    context:"Your friend is crying. You don't know what happened.",
+    text:"What do you say first?",
+    options:["What happened?","What has happened?","What did you do?","What were you doing?"],
+    answer:0,
+    explanation:"When you're asking about a specific past event (what caused this), Past Simple is natural: 'What happened?' You want to know the event, not the current state."
+  },
+  {
+    context:"You're talking about your primary school. It was years ago.",
+    text:"Which sounds most natural?",
+    options:["I loved primary school.","I've loved primary school.","I love primary school.","I had loved primary school."],
+    answer:0,
+    explanation:"Primary school is a closed chapter of your life — Past Simple is the natural choice."
+  },
+  {
+    context:"A news notification pops up: something major just happened. No time is given.",
+    text:"Which headline fits perfectly?",
+    options:["Scientists discovered water on Mars.","Scientists have discovered water on Mars.","Scientists were discovering water on Mars.","Scientists discover water on Mars."],
+    answer:1,
+    explanation:"Breaking news with no specific time mentioned uses Present Perfect — it's recent and currently relevant."
+  },
+  {
+    context:"You're explaining a scar on your arm to someone who asks about it.",
+    text:"What do you say?",
+    options:["I broke my arm when I was seven.","I've broken my arm when I was seven.","I break my arm when I was seven.","I had broken my arm when I was seven."],
+    answer:0,
+    explanation:"'When I was seven' is a specific finished past time — Past Simple."
+  },
+  {
+    context:"Your friend looks exhausted. They clearly haven't slept.",
+    text:"What do you ask?",
+    options:["Did you sleep last night?","Have you slept?","Were you sleeping?","Do you sleep?"],
+    answer:1,
+    explanation:"You're asking about their current state — have they slept (up to now)? Present Perfect connects the past event to the present exhaustion."
+  },
+  {
+    context:"Your group finished a project together. It's done. Everyone's relieved.",
+    text:"What do you say?",
+    options:["We finally finished it!","We've finally finished it!","We finally finish it!","We had finally finished it!"],
+    answer:1,
+    explanation:"You're announcing a just-completed achievement that's currently relevant — everyone is relieved right now. Present Perfect."
+  },
+];
+
+const ROUND_RULES = {
+  1:`<strong>No grammar labels here.</strong> The context is a situation — read it and decide whether the time is closed or still open.<br><span class="rt-example">Present Perfect → the event still affects NOW.<br>Past Simple → specific, finished, done.</span>`,
+  2:`<strong>One sentence. One decision.</strong> Is it Present Perfect or Past Simple? No gap to fill — just understand what the sentence is doing.<br><span class="rt-example">Finished time? → Past Simple. Still relevant now? → Present Perfect.</span>`,
+  3:`<strong>Both sentences are grammatically correct.</strong> Only one fits the scene. Think like the person in the situation.<br><span class="rt-example">The tense isn't just a rule — it's a choice.</span>`,
+  4:`<strong>Fill the gap, then justify it.</strong> Right answer + wrong reason = fewer points. Show your thinking.<br><span class="rt-example">The reason IS the grammar.</span>`,
+  5:`<strong>No grammar labels. No tense names. No clues.</strong> Just communication. Choose what a real person would actually say.<br><span class="rt-example">If it sounds right and fits the situation — it's right.</span>`,
+};
+
+// ═══════════════════════
+// UTILS
+// ═══════════════════════
 function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length-1; i > 0; i--) {
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i],a[j]] = [a[j],a[i]];
-  }
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
   return a;
 }
 
-// ═══════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════
-let MODE = null; // 'host' | 'player'
-let roomCode = null;
-let playerId = null;
-let playerName = null;
-let queuedQuestions = [];
-let currentQIndex = 0;
-let totalQuestions = 20;
-let questionDuration = 10000;
-let hostTimerInterval = null;
-let playerTimerInterval = null;
-let playerAnswered = false;
-let playerStreak = 0;
-let playerScore = 0;
-let answersListener = null;
-let stateListener = null;
-let playersListener = null;
-let questionResolved = false;  // guard against double-reveal
-let currentStartTime = 0;      // authoritative startTime from host push
-
-// Fuzzy match: normalise case, whitespace, apostrophes, AND contracted/expanded forms
 function fuzzyMatch(input, correct) {
   const norm = s => s.toLowerCase()
-    .replace(/[''`]/g, "'")
-    .replace(/\bis\s+not\b/g, "isn't")
-    .replace(/\bare\s+not\b/g, "aren't")
-    .replace(/\bam\s+not\b/g, "am not")
-    .replace(/\bwas\s+not\b/g, "wasn't")
-    .replace(/\bwere\s+not\b/g, "weren't")
-    .replace(/\s+/g, ' ')
-    .trim();
-  return norm(input) === norm(correct);
+    .replace(/[\u2018\u2019\u201c\u201d`']/g,"'")
+    .replace(/\bis\s+not\b/g,"isn't").replace(/\bare\s+not\b/g,"aren't")
+    .replace(/\bdo\s+not\b/g,"don't").replace(/\bdoes\s+not\b/g,"doesn't")
+    .replace(/\bhave\s+not\b/g,"haven't").replace(/\bhas\s+not\b/g,"hasn't")
+    .replace(/\bdid\s+not\b/g,"didn't")
+    .replace(/\s+/g,' ').trim();
+  const ni=norm(input),nc=norm(correct);
+  return ni===nc || ni.replace(/[.,!?]/g,'')===nc.replace(/[.,!?]/g,'');
 }
 
-// ═══════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════
-function goTo(screenId) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(screenId).classList.add('active');
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
 function flashScreen(type) {
-  const el = document.getElementById('flash');
-  el.className = 'flash ' + type;
-  setTimeout(() => el.className = 'flash', 350);
+  const el=document.getElementById('flash');
+  el.className='flash '+type;
+  setTimeout(()=>{el.className='flash';},400);
 }
 
-// ═══════════════════════════════════════
-// HOST — CREATE ROOM
-// ═══════════════════════════════════════
-function createRoom() {
-  totalQuestions = parseInt(document.getElementById('qCount').value);
-  questionDuration = parseInt(document.getElementById('qTime').value);
+// ═══════════════════════
+// STATE
+// ═══════════════════════
+let MODE=null,roomCode=null,playerId=null,playerName=null;
+let queuedQuestions=[],currentQIndex=0,totalQuestions=20,questionDuration=12000;
+let hostTimerInterval=null,playerTimerInterval=null;
+let playerAnswered=false,playerJustified=false,playerStreak=0,playerScore=0;
+let answersListener=null,stateListener=null,playerScoreListener=null,playerStatusListener=null;
+let questionResolved=false,currentStartTime=0,currentQ=null;
 
-  roomCode = Math.random().toString(36).substring(2,6).toUpperCase();
-  MODE = 'host';
-
-  // Build question queue — interleave boss questions every 5th slot
-  const shuffled = shuffle(ALL_QUESTIONS);
-  const bossPool = shuffle(BOSS_QUESTIONS);
-  let bossIdx = 0;
-  queuedQuestions = [];
-  let regularIdx = 0;
-  for (let i = 0; i < totalQuestions; i++) {
-    if ((i + 1) % 5 === 0) {
-      // Boss question slot
-      const bq = bossPool[bossIdx % bossPool.length];
-      queuedQuestions.push({ ...bq, boss: true, round: 4, level: 4 });
+// ═══════════════════════
+// QUEUE BUILDER
+// ═══════════════════════
+function buildQueue(total) {
+  const pools={1:shuffle(R1_QUESTIONS),2:shuffle(R2_QUESTIONS),3:shuffle(R3_QUESTIONS),4:shuffle(R4_QUESTIONS),5:shuffle(R5_QUESTIONS)};
+  const bossPool=shuffle(BOSS_POOL);
+  const ptrs={1:0,2:0,3:0,4:0,5:0};
+  // Cycle through all 5 rounds for regular questions
+  const order=[1,2,3,4,5,1,2,3,4];
+  let bossIdx=0,regCount=0,queue=[];
+  for(let i=0;i<total;i++){
+    if((i+1)%5===0){
+      const bq=bossPool[bossIdx%bossPool.length];
+      queue.push({...bq,round:'boss',level:99});
       bossIdx++;
     } else {
-      if (regularIdx < shuffled.length) {
-        queuedQuestions.push(shuffled[regularIdx++]);
-      }
+      const r=order[regCount%order.length];
+      const pool=pools[r];
+      const q=pool[ptrs[r]%pool.length];
+      const typeMap={2:'binary',3:'clash',4:'justify',5:'nolabels'};
+      const type=typeMap[r]||'mcq';
+      queue.push({...q,type,round:r,level:r});
+      ptrs[r]++;regCount++;
     }
   }
-
-  // Write room to Firebase
-  db.ref('rooms/' + roomCode).set({
-    status: 'lobby',
-    players: {},
-    currentQ: null,
-    totalQ: totalQuestions,
-    duration: questionDuration,
-  });
-
-  // Clean up on disconnect
-  db.ref('rooms/' + roomCode).onDisconnect().remove();
-
-  document.getElementById('roomCodeDisplay').textContent = roomCode;
-  goTo('host-lobby');
-
-  // Listen for players joining
-  playersListener = db.ref('rooms/' + roomCode + '/players').on('value', snap => {
-    const players = snap.val() || {};
-    renderLobbyPlayers(players);
-    const count = Object.keys(players).length;
-    const btn = document.getElementById('startBtn');
-    btn.disabled = count === 0;
-    btn.style.opacity = count === 0 ? '0.4' : '1';
-  });
+  return queue;
 }
 
-function renderLobbyPlayers(players) {
-  const el = document.getElementById('lobbyPlayers');
-  const list = Object.values(players);
-  if (list.length === 0) {
-    el.innerHTML = '<span class="waiting-hint">Waiting for players…</span>';
-    return;
-  }
-  el.innerHTML = list.map(p =>
-    `<div class="player-chip">${p.name}</div>`
-  ).join('');
-}
-
-function cancelRoom() {
-  if (roomCode) db.ref('rooms/' + roomCode).remove();
-  goTo('menu');
-}
-
-// ═══════════════════════════════════════
+// ═══════════════════════
+// HOST — CREATE ROOM
+// ═══════════════════════
+// ═══════════════════════
 // HOST — GAME
-// ═══════════════════════════════════════
-function startGame() {
-  db.ref('rooms/' + roomCode + '/status').set('playing');
-  goTo('host-game');
-  pushQuestion(0);
-}
-
-function pushQuestion(index) {
-  if (index >= queuedQuestions.length) {
-    endGame();
-    return;
-  }
-
-  const q = queuedQuestions[index];
-  currentQIndex = index;
-  setRoundColor(q.round);
-
-  // Update header
-  document.getElementById('hostRoundTag').textContent = q.boss ? '⚡ BOSS' : ROUND_NAMES[q.round];
-  document.getElementById('hostQCounter').textContent = `${index+1} / ${totalQuestions}`;
-  document.getElementById('hostAnswersIn').textContent = '0 answers';
-
-  // Render question card
-  document.getElementById('hostQContext').textContent = q.context;
-  const blankText = q.text.replace('___', `<span class="q-blank" id="hostBlank">___</span>`);
-  document.getElementById('hostQText').innerHTML = blankText;
-
-  // Host options — boss shows "Type-in" indicator, not clickable options
-  if (q.boss) {
-    document.getElementById('hostOptions').innerHTML =
-      `<div style="grid-column:1/-1;background:var(--accent-dim);border:2px solid var(--accent-border);padding:16px;text-align:center;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:0.1em;color:var(--accent)">
-        ⚡ BOSS QUESTION — Students type their answer · Worth 20 points
-        ${q.hint ? `<br><span style="color:var(--muted);margin-top:6px;display:block">Hint shown: ${q.hint}</span>` : ''}
-      </div>`;
-  } else {
-    const opts = shuffle(q.options);
-    document.getElementById('hostOptions').innerHTML = opts.map(o =>
-      `<div class="opt-host" id="opt-${o.replace(/\s/g,'_').replace(/'/g,'')}">${o}<span class="opt-count" id="count-${o.replace(/\s/g,'_').replace(/'/g,'')}"></span></div>`
-    ).join('');
-  }
-
-  // Push to Firebase for players
-  const startTime = Date.now();
-  currentStartTime = startTime;   // store authoritatively in state
-  questionResolved = false;       // reset guard for this question
-
-  db.ref('rooms/' + roomCode + '/currentQ').set({
-    text: q.text,
-    context: q.context,
-    options: q.boss ? null : shuffle(q.options),
-    answer: q.answer,
-    round: q.round,
-    boss: q.boss || false,
-    hint: q.hint || null,
-    startTime: startTime,
-    index: index,
-  });
-
-  // Clear previous answers, then detach old listener and attach fresh one
-  db.ref('rooms/' + roomCode + '/answers').remove().then(() => {
-    if (answersListener) {
-      db.ref('rooms/' + roomCode + '/answers').off('value', answersListener);
-      answersListener = null;
-    }
-    answersListener = db.ref('rooms/' + roomCode + '/answers').on('value', snap => {
-      const answers = snap.val() || {};
-      const count = Object.keys(answers).length;
-      document.getElementById('hostAnswersIn').textContent = `${count} answer${count !== 1 ? 's' : ''}`;
-
-      if (!q.boss) {
-        // Tally per option for non-boss
-        const tally = {};
-        Object.values(answers).forEach(a => { tally[a.answer] = (tally[a.answer] || 0) + 1; });
-        (q.options || []).forEach(o => {
-          const key = o.replace(/\s/g,'_').replace(/'/g,'');
-          const el = document.getElementById('count-' + key);
-          if (el) el.textContent = tally[o] ? tally[o] : '';
-        });
-      }
-    });
-  });
-
-  // Start timer
-  startHostTimer(startTime, questionDuration, q);
-}
-
-function startHostTimer(startTime, duration, q) {
-  clearInterval(hostTimerInterval);
-  const bar = document.getElementById('hostTimerBar');
-  bar.className = 'timer-bar-fill';
-  bar.style.width = '100%';
-
-  hostTimerInterval = setInterval(() => {
-    const elapsed = Date.now() - startTime;
-    const pct = Math.max(0, 1 - elapsed / duration);
-    bar.style.width = (pct * 100) + '%';
-    if (pct < 0.25) bar.className = 'timer-bar-fill urgent';
-    if (pct <= 0) {
-      clearInterval(hostTimerInterval);
-      // 200ms grace window for late submissions in transit
-      setTimeout(() => revealAnswer(q, startTime), 200);
-    }
-  }, 80);
-}
-
-function revealAnswer(q, startTime) {
-  // Guard: run exactly once per question
-  if (questionResolved) return;
-  questionResolved = true;
-
-  // Detach answers listener now — no more tally updates needed
-  if (answersListener) {
-    db.ref('rooms/' + roomCode + '/answers').off('value', answersListener);
-    answersListener = null;
-  }
-
-  // Highlight correct option on host (non-boss)
-  if (!q.boss) {
-    const correctKey = q.answer.replace(/\s/g,'_').replace(/'/g,'');
-    const correctEl = document.getElementById('opt-' + correctKey);
-    if (correctEl) correctEl.classList.add('is-correct');
-  }
-
-  // Reveal in blank
-  const blank = document.getElementById('hostBlank');
-  if (blank) { blank.textContent = q.answer; blank.classList.add('correct'); }
-
-  // Use authoritative startTime from state
-  const qStartTime = startTime || currentStartTime;
-
-  // Score players
-  db.ref('rooms/' + roomCode + '/answers').once('value', snap => {
-    const answers = snap.val() || {};
-
-    Object.entries(answers).forEach(([pid, v]) => {
-      const isCorrect = q.boss
-        ? fuzzyMatch(v.answer, q.answer)
-        : v.answer === q.answer;
-
-      const basePoints = q.boss ? 20 : 10;
-      const speedBonus = q.boss ? 0 : Math.floor(
-        (Math.max(0, questionDuration - (v.time - qStartTime)) / questionDuration) * 5
-      );
-
-      if (isCorrect) {
-        db.ref(`rooms/${roomCode}/players/${pid}/score`).transaction(s => (s||0) + basePoints + speedBonus);
-        db.ref(`rooms/${roomCode}/players/${pid}/streak`).transaction(s => (s||0) + 1);
-        db.ref(`rooms/${roomCode}/players/${pid}/lastCorrect`).set(true);
-      } else {
-        db.ref(`rooms/${roomCode}/players/${pid}/streak`).set(0);
-        db.ref(`rooms/${roomCode}/players/${pid}/lastCorrect`).set(false);
-      }
-    });
-  });
-
-  // Signal reveal to players
-  db.ref('rooms/' + roomCode + '/currentQ/revealed').set(true);
-
-  // Update leaderboard then advance
-  setTimeout(() => {
-    renderHostLeaderboard();
-    setTimeout(() => pushQuestion(currentQIndex + 1), 2200);
-  }, 1200);
-}
-
-function renderHostLeaderboard() {
-  db.ref('rooms/' + roomCode + '/players').once('value', snap => {
-    const players = Object.values(snap.val() || {});
-    players.sort((a,b) => b.score - a.score);
-    document.getElementById('hostLeaderboard').innerHTML = players.slice(0,6).map((p,i) =>
-      `<div class="lb-row ${i===0?'top':''}">
-        <span class="lb-pos">${i+1}</span>
-        <span class="lb-name">${p.name}</span>
-        <span class="lb-score">${p.score||0}</span>
-      </div>`
-    ).join('');
-  });
-}
-
-function endGame() {
-  clearInterval(hostTimerInterval);
-  db.ref('rooms/' + roomCode + '/status').set('ended');
-
-  db.ref('rooms/' + roomCode + '/players').once('value', snap => {
-    const players = Object.values(snap.val() || {});
-    players.sort((a,b) => b.score - a.score);
-
-    const medals = ['🥇','🥈','🥉'];
-    document.getElementById('finalLeaderboard').innerHTML = players.map((p,i) =>
-      `<div class="podium-row ${i<3?'p'+(i+1):''}">
-        <span class="podium-medal">${medals[i] || (i+1)+'.'}</span>
-        <span class="podium-name">${p.name}</span>
-        <span class="podium-score">${p.score||0}</span>
-      </div>`
-    ).join('');
-
-    const winner = players[0];
-    document.getElementById('endGrade').textContent = winner ? `🏆` : '✓';
-    document.getElementById('endSubtitle').textContent = winner
-      ? `${winner.name} wins with ${winner.score} points`
-      : 'Game complete';
-
-    goTo('end');
-    db.ref('rooms/' + roomCode).remove();
-  });
-}
-
-// ═══════════════════════════════════════
+// ═══════════════════════
+// ═══════════════════════
 // PLAYER — JOIN
-// ═══════════════════════════════════════
-function joinRoom() {
-  const name = document.getElementById('joinName').value.trim();
-  const code = document.getElementById('joinCode').value.trim().toUpperCase();
-  const err = document.getElementById('joinError');
+// ═══════════════════════
+// ═══════════════════════
+// PLAYER — LISTEN
+// ═══════════════════════
+// ═══════════════════════
+// BOSS RENDER FUNCTIONS
+// ═══════════════════════
 
-  if (!name) { err.textContent = 'Enter your name'; return; }
-  if (code.length !== 4) { err.textContent = 'Code must be 4 characters'; return; }
+// Clean up dynamically inserted boss elements between questions
+// ═══════════════════════
+// SOLO
+// ═══════════════════════
+const SOLO_ROUNDS=[
+  {id:1,pool:R1_QUESTIONS,type:'mcq'},
+  {id:2,pool:R2_QUESTIONS,type:'binary'},
+  {id:3,pool:R3_QUESTIONS,type:'clash'},
+  {id:4,pool:R4_QUESTIONS,type:'justify'},
+  {id:5,pool:R5_QUESTIONS,type:'nolabels'},
+];
 
-  err.textContent = '';
+let solo={
+  round:0,qIndex:0,lives:3,score:0,streak:0,bestStreak:0,totalCorrect:0,
+  answered:false,justified:false,timer:null,timerPct:100,
+  roundsDone:0,pool:[],justifyPending:false,justifyCorrectIdx:-1,
+  justifyAnswered:false,questionsAttempted:0,clashCorrect:0,justifyBonuses:0,
+};
 
-  // Check room exists
-  db.ref('rooms/' + code).once('value', snap => {
-    if (!snap.exists()) {
-      err.textContent = 'Room not found — check the code';
-      return;
-    }
-    const room = snap.val();
-    if (room.status === 'ended') {
-      err.textContent = 'This game has ended';
-      return;
-    }
+function startSolo(){
+  solo={round:0,qIndex:0,lives:3,score:0,streak:0,bestStreak:0,totalCorrect:0,
+    answered:false,justified:false,timer:null,timerPct:100,
+    roundsDone:0,pool:[],justifyPending:false,justifyCorrectIdx:-1,
+    justifyAnswered:false,questionsAttempted:0,clashCorrect:0,justifyBonuses:0};
+  sShowRoundTransition();
+}
 
-    playerId = localStorage.getItem('signalPid') || ('p_' + Date.now());
-    localStorage.setItem('signalPid', playerId);
-    playerName = name;
-    roomCode = code;
-    MODE = 'player';
-    playerScore = 0;
-    playerStreak = 0;
+function sShowRoundTransition(){
+  const r=SOLO_ROUNDS[solo.round];
+  setRoundColor(r.id);
+  const cfg=ROUND_CONFIG[r.id];
+  document.getElementById('s-roundNum').textContent=`Round 0${r.id} / 04`;
+  const nameParts=cfg.name.split(' ');
+  document.getElementById('s-roundName').innerHTML=nameParts.length>1?`${nameParts[0]} <span>${nameParts.slice(1).join(' ')}</span>`:`<span>${cfg.name}</span>`;
+  document.getElementById('s-roundMechanic').textContent=cfg.mechanic;
+  document.getElementById('s-roundRule').innerHTML=ROUND_RULES[r.id];
+  goTo('s-round-screen');
+  // Trigger entrance animation
+  requestAnimationFrame(()=>{
+    const hero=document.getElementById('s-roundHero');
+    if(hero){hero.classList.remove('arriving');requestAnimationFrame(()=>hero.classList.add('arriving'));}
+  });
+}
 
-    db.ref(`rooms/${code}/players/${playerId}`).set({
-      name,
-      score: 0,
-      streak: 0,
-      lastCorrect: null,
-    });
+function sBeginRound(){
+  const r=SOLO_ROUNDS[solo.round];
+  solo.pool=shuffle(r.pool);solo.qIndex=0;solo.answered=false;solo.justified=false;
+  goTo('s-game-screen');sRenderQ();
+}
 
+function updateBars(){
+  for(let i=0;i<3;i++){
+    const el=document.getElementById('s-bar'+i);
+    if(el)el.className='bar b'+(i+1)+(i>=solo.lives?' dead':'');
+  }
+}
+
+function sRenderQ(){
+  const r=SOLO_ROUNDS[solo.round];const q=solo.pool[solo.qIndex];
+  setRoundColor(r.id);
+  const cfg=ROUND_CONFIG[r.id];
+  document.getElementById('s-roundIndicator').textContent=`Round ${r.id} / 4`;
+  document.getElementById('s-roundLabel').textContent=cfg.name;
+  document.getElementById('s-scoreDisplay').textContent=solo.score;
+  document.getElementById('s-streakNum').textContent=solo.streak;
+  updateBars();
+  document.getElementById('s-progressFill').style.width=((solo.qIndex/solo.pool.length)*100)+'%';
+  document.getElementById('s-qCtx').textContent=q.context||'';
+  document.getElementById('s-feedbackRow').textContent='';
+  document.getElementById('s-feedbackRow').style.color='';
+  // Apply round colour to question card border
+  const qcard=document.getElementById('s-qcard');
+  qcard.style.borderTop='2px solid var(--rc)';
+  qcard.style.borderLeft='2px solid var(--rc)';
+  // post avatar
+  setPostAvatar('s-avatar','s-handle',r.id);
+  const oa=document.getElementById('s-optionsArea');oa.innerHTML='';
+  solo.answered=false;solo.justified=false;solo.justifyPending=false;solo.justifyAnswered=false;
+
+  if(r.type==='binary'){
+    document.getElementById('s-qText').innerHTML=`<strong>"${q.text}"</strong>`;
+    const sa=document.createElement('div');sa.className='swipe-area';
+    sa.innerHTML=`<button class="swipe-btn swipe-pp" id="s-swipePP" onclick="sSoloBinary('pp',this,'${q.answer}')">Present<br>Perfect</button>
+      <button class="swipe-btn swipe-ps" id="s-swipePS" onclick="sSoloBinary('ps',this,'${q.answer}')">Past<br>Simple</button>`;
+    oa.appendChild(sa);
+  } else if(r.type==='clash'){
+    document.getElementById('s-qText').innerHTML=
+      `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:8px;letter-spacing:0.1em">Which fits the scene?</span>${q.context}`;
+    const grid=document.createElement('div');grid.className='p-opts';grid.style.gridTemplateColumns='1fr';
+    (q.options||[]).forEach((o,i)=>{
+      const btn=document.createElement('button');btn.className='p-opt';
+      btn.style.textAlign='left';btn.style.fontSize='14px';btn.textContent=o;
+      btn.onclick=()=>sSoloClash(i,btn,q.answer,q.explanation||'');
+      grid.appendChild(btn);
+    });oa.appendChild(grid);
+  } else if(r.type==='nolabels'){
+    document.getElementById('s-qText').innerHTML=
+      (q.text||'');
+    const grid=document.createElement('div');grid.className='p-opts';
+    grid.style.gridTemplateColumns='1fr';
+    shuffle(q.options||[]).forEach(o=>{
+      const btn=document.createElement('button');btn.className='p-opt';
+      btn.style.cssText='text-align:left;font-size:15px;padding:18px 16px';
+      btn.textContent=o;
+      btn.onclick=()=>sSoloMCQ(o,btn,q.answer);
+      grid.appendChild(btn);
+    });oa.appendChild(grid);
+  } else if(r.type==='justify'){
+    document.getElementById('s-qText').innerHTML=
+      (q.text||'').replace('___',`<span id="s-blankSpan" style="display:inline-block;min-width:100px;border-bottom:2.5px solid var(--rc);color:var(--rc);text-align:center;padding:0 6px;vertical-align:bottom">___</span>`);
+    const grid=document.createElement('div');grid.className='p-opts';
+    shuffle(q.options||[]).forEach(o=>{
+      const btn=document.createElement('button');btn.className='p-opt';btn.textContent=o;
+      btn.onclick=()=>sSoloJustifyAnswer(o,btn,q);grid.appendChild(btn);
+    });oa.appendChild(grid);
+    solo.justifyCorrectIdx=q.correctJustify;solo.justifyOptions=q.justifyOptions||[];solo.justifyExplanation=q.explanation||'';
+  } else {
+    document.getElementById('s-qText').innerHTML=
+      (q.text||'').replace('___',`<span id="s-blankSpan" style="display:inline-block;min-width:100px;border-bottom:2.5px solid var(--rc);color:var(--rc);text-align:center;padding:0 6px;vertical-align:bottom;font-style:italic">___</span>`);
+    const grid=document.createElement('div');grid.className='p-opts';
+    shuffle(q.options||[]).forEach(o=>{
+      const btn=document.createElement('button');btn.className='p-opt';btn.textContent=o;
+      btn.onclick=()=>sSoloMCQ(o,btn,q.answer);grid.appendChild(btn);
+    });oa.appendChild(grid);
+  }
+
+  clearInterval(solo.timer);solo.timerPct=100;
+  const bar=document.getElementById('s-timerBar');bar.style.width='100%';bar.style.background='var(--rc)';
+  const timePerQ=r.type==='justify'?18000:r.type==='clash'?15000:12000;
+  solo.timer=setInterval(()=>{
+    solo.timerPct-=(100/(timePerQ/100));
+    bar.style.width=Math.max(0,solo.timerPct)+'%';
+    if(solo.timerPct<=25)bar.style.background='var(--wrong)';
+    if(solo.timerPct<=0){clearInterval(solo.timer);sSoloTimeout(q);}
+  },100);
+}
+
+function sSoloMCQ(chosen,btn,correct){
+  if(solo.answered)return;solo.answered=true;clearInterval(solo.timer);
+  const ok=chosen===correct;
+  const blank=document.getElementById('s-blankSpan');
+  if(blank){blank.textContent=ok?chosen:correct;blank.style.color=ok?'var(--correct)':'var(--wrong)';blank.style.borderBottomColor=ok?'var(--correct)':'var(--wrong)';blank.style.fontStyle='normal';}
+  document.querySelectorAll('#s-optionsArea .p-opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent.trim()===correct){b.style.background='var(--correct-dim)';b.style.borderColor='var(--correct-border)';b.style.color='var(--correct)';}
+    else if(b.textContent.trim()===chosen&&!ok){b.style.background='var(--wrong-dim)';b.style.borderColor='var(--wrong-border)';b.style.color='var(--wrong)';}
+  });
+  sHandleResult(ok,'');
+}
+
+function sSoloBinary(choice,btn,correct){
+  if(solo.answered)return;solo.answered=true;clearInterval(solo.timer);
+  const ok=choice===correct;
+  document.getElementById('s-swipePP').disabled=true;document.getElementById('s-swipePS').disabled=true;
+  btn.className=btn.className.split(' ').filter(c=>c!=='swipe-pp'&&c!=='swipe-ps').join(' ');
+  btn.classList.add(ok?'chosen-correct':'chosen-wrong');
+  const cb=document.getElementById(correct==='pp'?'s-swipePP':'s-swipePS');
+  if(!ok&&cb)cb.classList.add('reveal-correct');
+  sHandleResult(ok,'');
+}
+
+function sSoloClash(idx,btn,correct,explanation){
+  if(solo.answered)return;solo.answered=true;clearInterval(solo.timer);
+  const ok=idx===correct;
+  document.querySelectorAll('#s-optionsArea .p-opt').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===correct){b.style.background='var(--correct-dim)';b.style.borderColor='var(--correct-border)';b.style.color='var(--correct)';}
+    else if(i===idx&&!ok){b.style.background='var(--wrong-dim)';b.style.borderColor='var(--wrong-border)';b.style.color='var(--wrong)';}
+  });
+  if(ok)solo.clashCorrect++;
+  sHandleResult(ok,explanation);
+}
+
+function sSoloJustifyAnswer(chosen,btn,q){
+  if(solo.answered)return;solo.answered=true;clearInterval(solo.timer);
+  const ok=chosen===q.answer;
+  const blank=document.getElementById('s-blankSpan');
+  if(blank){blank.textContent=ok?chosen:q.answer;blank.style.color=ok?'var(--correct)':'var(--wrong)';blank.style.borderBottomColor=ok?'var(--correct)':'var(--wrong)';blank.style.fontStyle='normal';}
+  document.querySelectorAll('#s-optionsArea .p-opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent.trim()===q.answer){b.style.background='var(--correct-dim)';b.style.borderColor='var(--correct-border)';b.style.color='var(--correct)';}
+    else if(b.textContent.trim()===chosen&&!ok){b.style.background='var(--wrong-dim)';b.style.borderColor='var(--wrong-border)';b.style.color='var(--wrong)';}
+  });
+  if(ok){
+    solo.justifyPending=true;
+    const fb=document.getElementById('s-feedbackRow');
+    fb.textContent='✓ Correct — now choose your reason (+5)';fb.style.color='var(--correct)';
+    const jw=document.createElement('div');jw.style.cssText='margin-top:12px;display:flex;flex-direction:column;gap:8px;';
+    const jLabel=document.createElement('div');jLabel.className='justify-label';jLabel.textContent='Why? Choose a reason:';jw.appendChild(jLabel);
+    const jtiles=document.createElement('div');jtiles.className='justify-tiles';
+    (q.justifyOptions||[]).forEach((j,i)=>{
+      const tile=document.createElement('div');tile.className='j-tile';tile.textContent=j;
+      tile.onclick=()=>{
+        if(solo.justifyAnswered)return;solo.justifyAnswered=true;
+        const isJ=i===q.correctJustify;
+        tile.classList.add(isJ?'j-correct':'j-wrong');
+        document.querySelectorAll('.j-tile').forEach(t=>t.classList.add('locked'));
+        if(isJ){fb.textContent='✓ Right reason too — +5 bonus!';solo.score+=5;solo.justifyBonuses++;document.getElementById('s-scoreDisplay').textContent=solo.score;}
+        else{fb.textContent=`✗ Right answer, wrong reason. It was: ${q.justifyOptions[q.correctJustify]}`;fb.style.color='var(--wrong)';}
+        setTimeout(()=>sNextQ(),1800);
+      };jtiles.appendChild(tile);
+    });jw.appendChild(jtiles);document.getElementById('s-optionsArea').appendChild(jw);
+  } else {sHandleResult(false,q.explanation||'');}
+}
+
+function sHandleResult(ok,explanation){
+  solo.questionsAttempted++;
+  const fb=document.getElementById('s-feedbackRow');
+  if(ok){
+    solo.streak++;solo.totalCorrect++;
+    if(solo.streak>solo.bestStreak)solo.bestStreak=solo.streak;
+    const pts=10+Math.min((solo.streak>1?(solo.streak-1)*2:0),10);
+    solo.score+=pts;
+    document.getElementById('s-scoreDisplay').textContent=solo.score;
+    document.getElementById('s-streakNum').textContent=solo.streak;
+    fb.textContent=solo.streak>2?`✓ +${pts} (×${solo.streak} streak)`:`✓ +${pts}`;
+    fb.style.color='var(--correct)';
+    flashScreen('green');
+    if(!solo.justifyPending)setTimeout(()=>sNextQ(),900);
+  } else {
+    solo.streak=0;document.getElementById('s-streakNum').textContent=0;
+    fb.textContent=explanation?`✗ ${explanation}`:'✗ Wrong';
+    fb.style.color='var(--wrong)';
+    flashScreen('red');sLoseLife();setTimeout(()=>sNextQ(),2200);
+  }
+}
+
+function sSoloTimeout(q){
+  if(solo.answered)return;solo.answered=true;solo.questionsAttempted++;
+  const fb=document.getElementById('s-feedbackRow');
+  fb.textContent=`Time's up — answer: ${typeof q.answer==='number'?(q.options||[])[q.answer]:q.answer}`;
+  fb.style.color='var(--wrong)';flashScreen('red');sLoseLife();setTimeout(()=>sNextQ(),2000);
+}
+
+function sLoseLife(){
+  if(solo.lives<=0)return;solo.lives--;
+  updateBars();
+  if(solo.lives<=0){clearInterval(solo.timer);solo.roundsDone=solo.round+1;setTimeout(()=>sShowEnd(),2400);}
+}
+
+function sNextQ(){
+  if(solo.lives<=0)return;
+  if(solo.justifyPending&&!solo.justifyAnswered)return;
+  solo.qIndex++;
+  if(solo.qIndex>=solo.pool.length){
+    solo.roundsDone=solo.round+1;solo.round++;
+    if(solo.round>=SOLO_ROUNDS.length){sShowEnd();return;}
+    sShowRoundTransition();
+  } else {sRenderQ();}
+}
+
+function sShowEnd(){
+  clearInterval(solo.timer);
+  const total=solo.questionsAttempted||1;
+  const pct=Math.round((solo.totalCorrect/total)*100);
+  let grade,gColor,label,message;
+  if(pct>=90){grade='S';gColor='var(--correct)';label='Fluent';message="You're not just using the right form — you understand what each tense is doing. That's the real thing.";}
+  else if(pct>=75){grade='A';gColor='var(--r1)';label='Strong';message="Solid. The meaning is clicking. Push for the justify bonuses next time — that's where real understanding shows.";}
+  else if(pct>=60){grade='B';gColor='var(--r2)';label='Getting it';message="You have the basics. The Context Clash and Justify rounds are where you can still grow.";}
+  else if(pct>=45){grade='C';gColor='var(--r3)';label='Developing';message="Some of this is landing. Try Round 3 — it forces the reasoning you need.";}
+  else{grade='D';gColor='var(--wrong)';label='Keep going';message="Present Perfect vs Past Simple is genuinely hard. Focus on what the tense does, not what words are in the sentence.";}
+
+  document.getElementById('s-endGrade').textContent=grade;
+  document.getElementById('s-endGrade').style.color=gColor;
+  document.getElementById('s-endLabel').textContent=`${label} · ${pct}%`;
+  document.getElementById('s-finalScore').textContent=solo.score;
+  document.getElementById('s-finalCorrect').textContent=solo.totalCorrect;
+  document.getElementById('s-finalStreak').textContent=solo.bestStreak;
+  document.getElementById('s-finalRounds').textContent=solo.roundsDone;
+
+  const achs=[];
+  if(solo.bestStreak>=5)achs.push({icon:'🔥',name:'On a Run',desc:`${solo.bestStreak} correct in a row`});
+  if(solo.justifyBonuses>=3)achs.push({icon:'🧠',name:'Real Understanding',desc:'Justified correctly 3+ times'});
+  if(solo.clashCorrect>=4)achs.push({icon:'🔍',name:'Context Reader',desc:'4+ Context Clash questions correct'});
+  if(solo.lives===3&&solo.roundsDone>=2)achs.push({icon:'🛡️',name:'Untouchable',desc:'2+ rounds without losing a life'});
+  if(pct>=90)achs.push({icon:'📡',name:'Full Signal',desc:'90%+ correct'});
+  if(achs.length===0)achs.push({icon:'⚡',name:'First Attempt',desc:'Complete a full run for more achievements'});
+  document.getElementById('s-achievements').innerHTML=achs.map(a=>
+    `<div class="ach"><div class="ach-icon">${a.icon}</div><div class="ach-body"><div class="ach-name">${a.name}</div><div class="ach-desc">${a.desc}</div></div></div>`
+  ).join('');
+
+  const insightEl=document.getElementById('s-grammarInsight');
+  const insightText=document.getElementById('s-insightText');
+  if(solo.roundsDone>=2){
+    insightEl.style.display='block';
+    if(solo.justifyBonuses>0){insightText.textContent=`You justified ${solo.justifyBonuses} answer${solo.justifyBonuses>1?'s':''} correctly — you're not just recognising the right form, you can explain why.`;}
+    else if(solo.clashCorrect>=3){insightText.textContent=`You chose the right sentence for the scene ${solo.clashCorrect} times. Tense isn't just a grammar rule — it's a choice the speaker makes based on meaning.`;}
+    else{insightText.textContent=`Present Perfect = the past event still matters now. Past Simple = it's finished, done. When in doubt: is the consequence still here? If yes, probably Present Perfect.`;}
+  }
+  document.getElementById('s-endMessage').textContent=message;
+  goTo('s-end-screen');
+}
+
+
+// ═══════════════════════
+// PLAYER FUNCTIONS
+// ═══════════════════════
+
+function joinRoom(){
+  const name=document.getElementById('joinName').value.trim();
+  const code=document.getElementById('joinCode').value.trim().toUpperCase();
+  const err=document.getElementById('joinError');
+  if(!name){err.textContent='Enter your name';return;}
+  if(code.length!==4){err.textContent='Code must be 4 characters';return;}
+  err.textContent='';
+  db.ref('rooms/'+code).once('value',snap=>{
+    if(!snap.exists()){err.textContent='PIN not found — check with your teacher';return;}
+    if(snap.val().status==='ended'){err.textContent='This game has ended';return;}
+    playerId='p_'+Date.now()+'_'+Math.random().toString(36).substr(2,4);
+    playerName=name;roomCode=code;MODE='player';
+    playerScore=0;playerStreak=0;playerAnswered=false;playerJustified=false;
+    db.ref(`rooms/${code}/players/${playerId}`).set({name,score:0,streak:0});
     db.ref(`rooms/${code}/players/${playerId}`).onDisconnect().remove();
-
     goTo('player-waiting');
-    document.getElementById('playerWaitStatus').textContent = 'Waiting for the host to start…';
-    document.getElementById('playerScoreWait').textContent = '0';
-
+    document.getElementById('playerWaitStatus').textContent='Waiting for host…';
+    document.getElementById('playerScoreWait').textContent='0';
     listenForGameState();
   });
 }
 
-// ═══════════════════════════════════════
-// PLAYER — LISTEN
-// ═══════════════════════════════════════
-function listenForGameState() {
-  stateListener = db.ref('rooms/' + roomCode + '/currentQ').on('value', snap => {
-    const q = snap.val();
-    if (!q) return;
 
-    // New question
-    if (!q.revealed) {
-      playerAnswered = false;
-      window._currentQ = q;
+
+function listenForGameState(){
+  stateListener=db.ref('rooms/'+roomCode+'/currentQ').on('value',snap=>{
+    const q=snap.val();if(!q)return;
+    if(!q.revealed){
+      playerAnswered=false;playerJustified=false;currentQ=q;
       setRoundColor(q.round);
       goTo('player-game');
+      setPostAvatar('playerAvatar','playerHandle',q.round);
       renderPlayerQuestion(q);
-      startPlayerTimer(q.startTime, db.ref(`rooms/${roomCode}`).child('duration'));
-    } else {
-      // Reveal phase
-      showPlayerReveal(q);
-    }
+      startPlayerTimer(q.startTime);
+    } else {showPlayerReveal(q);}
   });
-
-  // Listen for score updates
-  db.ref(`rooms/${roomCode}/players/${playerId}`).on('value', snap => {
-    const p = snap.val();
-    if (!p) return;
-    playerScore = p.score || 0;
-    playerStreak = p.streak || 0;
-    document.getElementById('playerScore').textContent = playerScore;
-    document.getElementById('playerStreak').textContent = playerStreak;
-    document.getElementById('playerScoreWait').textContent = playerScore;
+  playerScoreListener=db.ref(`rooms/${roomCode}/players/${playerId}`).on('value',snap=>{
+    const p=snap.val();if(!p)return;
+    playerScore=p.score||0;playerStreak=p.streak||0;
+    document.getElementById('playerScore').textContent=playerScore;
+    document.getElementById('playerStreak').textContent=playerStreak;
+    document.getElementById('playerScoreWait').textContent=playerScore;
   });
-
-  // Listen for game end
-  db.ref('rooms/' + roomCode + '/status').on('value', snap => {
-    if (snap.val() === 'ended') showPlayerEnd();
+  playerStatusListener=db.ref('rooms/'+roomCode+'/status').on('value',snap=>{
+    if(snap.val()==='ended')showPlayerEnd();
   });
 }
 
-function renderPlayerQuestion(q) {
-  // Show question with blank
-  document.getElementById('playerQText').innerHTML =
-    q.text.replace('___', `<span style="border-bottom:3px solid var(--rc);color:var(--rc);padding:0 8px">___</span>`);
 
-  document.getElementById('playerFeedback').textContent = '';
-  document.getElementById('playerFeedback').className = 'player-feedback';
 
-  if (q.boss) {
-    // Boss question — type-in mode
-    document.getElementById('playerOptions').innerHTML = '';
-    document.getElementById('bossInputWrap').style.display = 'block';
-    document.getElementById('bossInput').value = '';
-    document.getElementById('bossInput').disabled = false;
-    document.getElementById('bossHint').textContent = q.hint ? `Hint: ${q.hint}` : '';
-    setTimeout(() => document.getElementById('bossInput').focus(), 100);
+function renderPlayerQuestion(q){
+  cleanBossUI();
+  const po=document.getElementById('playerOptions');
+  po.innerHTML='';po.style.display='grid';
+  po.style.gridTemplateColumns='1fr 1fr';
+  document.getElementById('swipeArea').style.display='none';
+  document.getElementById('sortWrap').style.display='none';
+  document.getElementById('boss-input-wrap').style.display='none';
+  document.getElementById('justifyWrap').style.display='none';
+  document.getElementById('playerFeedback').textContent='';
+  document.getElementById('playerFeedback').className='pfeedback';
+
+  if(q.type==='binary'){
+    document.getElementById('playerQText').innerHTML=
+      `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:12px;letter-spacing:0.1em;text-transform:uppercase">Present Perfect or Past Simple?</span><strong>"${q.text}"</strong>`;
+    po.style.display='none';
+    const sa=document.getElementById('swipeArea');sa.style.display='flex';
+    document.getElementById('swipePP').disabled=false;
+    document.getElementById('swipePS').disabled=false;
+    document.getElementById('swipePP').className='swipe-btn swipe-pp';
+    document.getElementById('swipePS').className='swipe-btn swipe-ps';
+  } else if(q.type==='clash'){
+    document.getElementById('playerQText').innerHTML=
+      `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase">Which fits the scene?</span>${q.context}`;
+    po.style.display='grid';
+    po.style.gridTemplateColumns='1fr';
+    po.innerHTML=(q.options||[]).map((o,i)=>
+      `<button class="p-opt" onclick="submitClash(${i},this,${q.answer})" style="text-align:left;font-size:14px">${o}</button>`
+    ).join('');
+  } else if(q.type==='boss'){
+    if(q.bossType==='court'){
+      renderBossCourt(q, po);
+    } else if(q.bossType==='detective'){
+      renderBossDetective(q, po);
+    } else if(q.bossType==='impossible'){
+      renderBossImpossible(q, po);
+    } else {
+      // Legacy text-input boss
+      document.getElementById('playerQText').innerHTML=
+        `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--rb);display:block;margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase">🔔 Boss question</span>${q.text}`;
+      po.style.display='none';
+      const biw=document.getElementById('boss-input-wrap');biw.style.display='block';
+      const bi=document.getElementById('bossInput');bi.value='';bi.disabled=false;
+      document.getElementById('bossHint').textContent=q.hint?`Hint: ${q.hint}`:'';
+      biw.querySelector('button').disabled=false;
+      setTimeout(()=>bi.focus(),150);
+    }
+  } else if(q.type==='justify'){
+    document.getElementById('playerQText').innerHTML=
+      (q.context?`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase">${q.context}</span>`:'')
+      +(q.text||'').replace('___',`<span style="border-bottom:2.5px solid var(--rc);color:var(--rc);padding:0 6px">___</span>`);
+    po.innerHTML=(q.options||[]).map(o=>
+      `<button class="p-opt" onclick="submitJustify('${o.replace(/'/g,"\\'")}',this,'${(q.answer||'').replace(/'/g,"\\'")}')"> ${o}</button>`
+    ).join('');
+  } else if(q.type==='nolabels'){
+    document.getElementById('playerQText').innerHTML=
+      (q.context?`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">${q.context}</span>`:'')
+      +(q.text||'');
+    po.style.gridTemplateColumns='1fr';
+    po.innerHTML=(q.options||[]).map(o=>
+      `<button class="p-opt" onclick="submitAnswer('${o.replace(/'/g,"\'")}',this,'${(q.answer||'').replace(/'/g,"\'")}'" style="text-align:left;font-size:15px;padding:18px 16px">${o}</button>`
+    ).join('');
   } else {
-    // Normal question — multiple choice
-    document.getElementById('bossInputWrap').style.display = 'none';
-    document.getElementById('playerOptions').innerHTML = q.options.map(o =>
-      `<button class="opt-player" onclick="submitAnswer('${o.replace(/'/g,"\\'")}',this,'${q.answer.replace(/'/g,"\\'")}')">
-        ${o}
-      </button>`
+    document.getElementById('playerQText').innerHTML=
+      (q.context?`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase">${q.context}</span>`:'')
+      +(q.text||'').replace('___',`<span style="border-bottom:2.5px solid var(--rc);color:var(--rc);padding:0 6px;font-style:italic">___</span>`);
+    po.innerHTML=(q.options||[]).map(o=>
+      `<button class="p-opt" onclick="submitAnswer('${o.replace(/'/g,"\\'")}',this,'${(q.answer||'').replace(/'/g,"\\'")}')"> ${o}</button>`
     ).join('');
   }
 }
 
-function submitAnswer(chosen, btn, correct) {
-  if (playerAnswered) return;
-  playerAnswered = true;
 
-  // Disable all buttons
-  document.querySelectorAll('.opt-player').forEach(b => b.disabled = true);
 
-  const isCorrect = chosen === correct;
-
-  if (isCorrect) {
-    btn.classList.add('answered-correct');
-    document.getElementById('playerFeedback').textContent = '✓ Correct!';
-    document.getElementById('playerFeedback').className = 'player-feedback fb-correct';
-    flashScreen('green');
-  } else {
-    btn.classList.add('answered-wrong');
-    document.getElementById('playerFeedback').textContent = `✗ Wrong`;
-    document.getElementById('playerFeedback').className = 'player-feedback fb-wrong';
-    flashScreen('red');
-  }
-
-  // Write answer to Firebase
-  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({
-    answer: chosen,
-    time: Date.now(),
-  });
+function submitAnswer(chosen,btn,correct){
+  if(playerAnswered)return;playerAnswered=true;
+  document.querySelectorAll('.p-opt').forEach(b=>b.disabled=true);
+  const ok=chosen===correct;
+  btn.classList.add(ok?'answered-correct':'answered-wrong');
+  document.getElementById('playerFeedback').textContent=ok?'✓ Correct':'✗ Wrong';
+  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
+  flashScreen(ok?'green':'red');
+  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:chosen,time:Date.now()});
 }
 
-function submitBossAnswer() {
-  if (playerAnswered) return;
-  const val = document.getElementById('bossInput').value.trim();
-  if (!val) return;
-  playerAnswered = true;
 
-  document.getElementById('bossInput').disabled = true;
-  document.querySelector('#bossInputWrap button').disabled = true;
 
-  // Client-side fuzzy check for immediate feedback
-  // (host will do authoritative check for scoring)
-  const q = window._currentQ;
-  const localCorrect = q && fuzzyMatch(val, q.answer);
-
-  if (localCorrect) {
-    document.getElementById('playerFeedback').textContent = '✓ Looks right!';
-    document.getElementById('playerFeedback').className = 'player-feedback fb-correct';
-    flashScreen('green');
-  } else {
-    document.getElementById('playerFeedback').textContent = '⏳ Submitted — wait for reveal';
-    document.getElementById('playerFeedback').className = 'player-feedback fb-waiting';
-  }
-
-  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({
-    answer: val,
-    time: Date.now(),
-  });
+function submitSwipe(choice,btn){
+  if(playerAnswered)return;playerAnswered=true;
+  document.getElementById('swipePP').disabled=true;document.getElementById('swipePS').disabled=true;
+  const ok=choice===currentQ.answer;
+  btn.classList.add(ok?'chosen-correct':'chosen-wrong');
+  document.getElementById('playerFeedback').textContent=ok?'✓ Correct':'✗ Wrong';
+  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
+  flashScreen(ok?'green':'red');
+  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:choice,time:Date.now()});
 }
 
-function showPlayerReveal(q) {
-  // Disable boss input if showing
-  document.getElementById('bossInput').disabled = true;
-  const bossBtn = document.querySelector('#bossInputWrap button');
-  if (bossBtn) bossBtn.disabled = true;
 
-  // Reveal correct answer on buttons (non-boss)
-  document.querySelectorAll('.opt-player').forEach(btn => {
-    btn.disabled = true;
-    if (btn.textContent.trim() === q.answer) {
-      if (!btn.classList.contains('answered-wrong')) {
-        btn.classList.add('reveal-correct');
-      }
+
+function submitClash(idx,btn,correct){
+  if(playerAnswered)return;playerAnswered=true;
+  document.querySelectorAll('.p-opt').forEach(b=>b.disabled=true);
+  const ok=idx===parseInt(correct,10);
+  btn.classList.add(ok?'answered-correct':'answered-wrong');
+  document.getElementById('playerFeedback').textContent=ok?'✓ Correct':'✗ Wrong';
+  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
+  flashScreen(ok?'green':'red');
+  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:idx,time:Date.now()});
+}
+
+
+
+function submitJustify(chosen,btn,correct){
+  if(playerAnswered)return;playerAnswered=true;
+  document.querySelectorAll('.p-opt').forEach(b=>b.disabled=true);
+  const ok=chosen===correct;
+  btn.classList.add(ok?'answered-correct':'answered-wrong');
+  document.getElementById('playerFeedback').textContent=ok?'✓ Correct — now justify it':'✗ Wrong';
+  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
+  flashScreen(ok?'green':'red');
+  if(ok&&currentQ.justifyOptions){
+    const jw=document.getElementById('justifyWrap');jw.style.display='block';
+    document.getElementById('justifyTiles').innerHTML=(currentQ.justifyOptions||[]).map((j,i)=>
+      `<div class="j-tile" onclick="submitJustifyTile(${i},this)">${j}</div>`
+    ).join('');
+  }
+  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:chosen,time:Date.now()});
+}
+
+
+
+function submitJustifyTile(idx,el){
+  if(playerJustified)return;playerJustified=true;
+  const ok=idx===currentQ.correctJustify;
+  document.querySelectorAll('.j-tile').forEach(t=>t.classList.add('locked'));
+  el.classList.add(ok?'j-correct':'j-wrong');
+  document.getElementById('playerFeedback').textContent=ok?'✓ Right answer + right reason — bonus!':'✗ Right answer, wrong reason — no bonus';
+  db.ref(`rooms/${roomCode}/answers/${playerId}/justify`).set(idx);
+}
+
+
+
+function submitBossAnswer(){
+  if(playerAnswered)return;
+  const val=document.getElementById('bossInput').value.trim();if(!val)return;
+  playerAnswered=true;
+  document.getElementById('bossInput').disabled=true;
+  document.querySelector('#boss-input-wrap button').disabled=true;
+  const ok=currentQ&&fuzzyMatch(val,currentQ.answer);
+  document.getElementById('playerFeedback').textContent=ok?'✓ Looks right — waiting for confirm':'⏳ Submitted — wait for reveal';
+  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wait');
+  if(ok)flashScreen('boss');
+  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:val,time:Date.now()});
+}
+
+
+
+function showPlayerReveal(q){
+  document.getElementById('bossInput').disabled=true;
+  const bb=document.querySelector('#boss-input-wrap button');if(bb)bb.disabled=true;
+  document.querySelectorAll('.p-opt').forEach(b=>{
+    b.disabled=true;
+    if(!b.classList.contains('answered-wrong')&&!b.classList.contains('answered-correct')){
+      if(b.textContent.trim()===q.answer)b.classList.add('reveal-correct');
     }
   });
-
-  if (!playerAnswered) {
-    document.getElementById('playerFeedback').textContent = "Time's up — the answer was: " + q.answer;
-    document.getElementById('playerFeedback').className = 'player-feedback fb-wrong';
-  } else if (q.boss) {
-    // Show correct answer for boss questions
-    document.getElementById('playerFeedback').textContent = `Answer: ${q.answer}`;
-    document.getElementById('playerFeedback').className = 'player-feedback fb-waiting';
+  if(q.type==='binary'){
+    const cb=document.getElementById(q.answer==='pp'?'swipePP':'swipePS');
+    if(cb&&!cb.classList.contains('chosen-correct')&&!cb.classList.contains('chosen-wrong'))cb.classList.add('reveal-correct');
+  }
+  if(!playerAnswered){
+    document.getElementById('playerFeedback').textContent=`Time's up — answer: ${typeof q.answer==='number'?(q.options||[])[q.answer]:q.answer}`;
+    document.getElementById('playerFeedback').className='pfeedback fb-wrong';
+  }
+  if(q.explanation){
+    setTimeout(()=>{
+      document.getElementById('playerFeedback').textContent=q.explanation;
+      document.getElementById('playerFeedback').className='pfeedback fb-wait';
+    },1200);
   }
 }
 
-function startPlayerTimer(startTime, durationRef) {
+
+
+function startPlayerTimer(startTime){
   clearInterval(playerTimerInterval);
-  const bar = document.getElementById('playerTimerBar');
-  bar.className = 'timer-bar-fill';
-  bar.style.width = '100%';
-
-  // Get duration from Firebase
-  db.ref('rooms/' + roomCode + '/duration').once('value', snap => {
-    const duration = snap.val() || 10000;
-
-    playerTimerInterval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const pct = Math.max(0, 1 - elapsed / duration);
-      bar.style.width = (pct * 100) + '%';
-      if (pct < 0.25) bar.className = 'timer-bar-fill urgent';
-      if (pct <= 0) clearInterval(playerTimerInterval);
-    }, 80);
+  const bar=document.getElementById('playerTimerBar');
+  bar.className='timer-fill';bar.style.width='100%';
+  db.ref('rooms/'+roomCode+'/duration').once('value',snap=>{
+    const dur=snap.val()||12000;
+    playerTimerInterval=setInterval(()=>{
+      const pct=Math.max(0,1-(Date.now()-startTime)/dur);
+      bar.style.width=(pct*100)+'%';
+      if(pct<0.25)bar.className='timer-fill urgent';
+      if(pct<=0)clearInterval(playerTimerInterval);
+    },80);
   });
 }
 
-function showPlayerEnd() {
+
+
+function showPlayerEnd(){
   clearInterval(playerTimerInterval);
-  db.ref('rooms/' + roomCode + '/players').once('value', snap => {
-    const players = Object.values(snap.val() || {});
-    players.sort((a,b) => b.score - a.score);
-
-    const myRank = players.findIndex(p => p.name === playerName) + 1;
-    const medals = ['🥇','🥈','🥉'];
-
-    document.getElementById('endGrade').textContent = medals[myRank-1] || `#${myRank}`;
-    document.getElementById('endSubtitle').textContent =
-      `You scored ${playerScore} · Rank ${myRank} of ${players.length}`;
-
-    document.getElementById('finalLeaderboard').innerHTML = players.map((p,i) =>
+  if(stateListener)db.ref('rooms/'+roomCode+'/currentQ').off('value',stateListener);
+  if(playerScoreListener)db.ref(`rooms/${roomCode}/players/${playerId}`).off('value',playerScoreListener);
+  if(playerStatusListener)db.ref('rooms/'+roomCode+'/status').off('value',playerStatusListener);
+  db.ref('rooms/'+roomCode+'/players').once('value',snap=>{
+    const players=Object.values(snap.val()||{}).sort((a,b)=>b.score-a.score);
+    const myRank=players.findIndex(p=>p.name===playerName)+1;
+    const medals=['🥇','🥈','🥉'];
+    document.getElementById('endSubtitle').textContent=`You scored ${playerScore} · Rank ${myRank} of ${players.length}`;
+    document.getElementById('finalLeaderboard').innerHTML=players.map((p,i)=>
       `<div class="podium-row ${i<3?'p'+(i+1):''} ${p.name===playerName?'top':''}">
-        <span class="podium-medal">${medals[i] || (i+1)+'.'}</span>
-        <span class="podium-name">${p.name}${p.name===playerName?' ← you':''}</span>
+        <span class="podium-medal">${medals[i]||(i+1)+'.'}</span>
+        <span class="podium-name">${esc(p.name)}${p.name===playerName?' ← you':''}</span>
         <span class="podium-score">${p.score||0}</span>
       </div>`
     ).join('');
-
     goTo('end');
   });
 }
 
-// ═══════════════════════════════════════
-// SOLO MODE
-// ═══════════════════════════════════════
 
-const SOLO_ROUNDS = [
-  {
-    id: 1, name: 'Be + -ing', label: 'Choose the right form of be',
-    rule: '<strong>The present progressive:</strong> use <em>am / is / are</em> + the -ing form of the verb.<br><span style="font-family:\'Space Mono\',monospace;font-size:12px;color:var(--accent);display:block;margin-top:6px">I am reading. · She is sleeping. · They are talking.</span>',
-    questions: [
-      { context:'One person', text:'She ___ running in the park.', blank:'___', options:['is','are','am','be'], answer:'is' },
-      { context:'Two people', text:'They ___ eating lunch.', blank:'___', options:['are','is','am','be'], answer:'are' },
-      { context:'Talking about yourself', text:'I ___ listening to music.', blank:'___', options:['am','is','are','be'], answer:'am' },
-      { context:'One person', text:'He ___ watching a film.', blank:'___', options:['is','are','am','were'], answer:'is' },
-      { context:'A group', text:'We ___ playing football.', blank:'___', options:['are','is','am','be'], answer:'are' },
-      { context:'One thing', text:'The dog ___ sleeping on the sofa.', blank:'___', options:['is','are','am','be'], answer:'is' },
-      { context:'You and a friend', text:'You ___ making a lot of noise.', blank:'___', options:['are','is','am','be'], answer:'are' },
-      { context:'A woman', text:'Mrs Malady ___ opening the door.', blank:'___', options:['is','are','am','be'], answer:'is' },
-      { context:'Two things', text:'The machines ___ moving.', blank:'___', options:['are','is','am','be'], answer:'are' },
-      { context:'Talking about yourself', text:'I ___ waiting for Noah.', blank:'___', options:['am','is','are','be'], answer:'am' },
-    ]
-  },
-  {
-    id: 2, name: 'Spelling', label: 'Choose the correct -ing form',
-    rule: '<strong>Three spelling groups:</strong><br>Group 1: just add -ing → <em>sing → singing</em><br>Group 2: drop the e → <em>hide → hiding</em><br>Group 3: double the consonant → <em>run → running</em><span style="font-family:\'Space Mono\',monospace;font-size:12px;color:var(--accent);display:block;margin-top:6px">swim → swimming · make → making · read → reading</span>',
-    questions: [
-      { context:'Group 1 — just add -ing', text:'She is ___ a song.', blank:'___', options:['singing','singeing','singingg','sings'], answer:'singing' },
-      { context:'Group 2 — drop the e', text:'He is ___ behind the post box.', blank:'___', options:['hiding','hideing','hididng','hidings'], answer:'hiding' },
-      { context:'Group 3 — double the consonant', text:'They are ___ in the sea.', blank:'___', options:['swimming','swiming','swimmingg','swimeing'], answer:'swimming' },
-      { context:'Group 2 — drop the e', text:'She is ___ a cake.', blank:'___', options:['making','makeing','macking','makking'], answer:'making' },
-      { context:'Group 3 — double the consonant', text:'Noah is ___ after Buddy.', blank:'___', options:['running','runing','runeing','runns'], answer:'running' },
-      { context:'Group 1 — just add -ing', text:'The children are ___ a book.', blank:'___', options:['reading','readding','readeing','reads'], answer:'reading' },
-      { context:'Group 3 — double the consonant', text:'He is ___ to Alice.', blank:'___', options:['chatting','chating','chatteing','chats'], answer:'chatting' },
-      { context:'Group 2 — drop the e', text:'They are ___ the problem.', blank:'___', options:['deciding','decideing','decid-ing','decidding'], answer:'deciding' },
-      { context:'Group 1 — just add -ing', text:'I am ___ for my phone.', blank:'___', options:['looking','lookking','lookeing','looks'], answer:'looking' },
-      { context:'Group 3 — double the consonant', text:'She is ___ on the chair.', blank:'___', options:['sitting','siting','sitteing','sits'], answer:'sitting' },
-    ]
-  },
-  {
-    id: 3, name: 'Positive / Negative', label: 'Is it happening, or not?',
-    rule: '<strong>Negative:</strong> use <em>am not / isn\'t / aren\'t</em> + -ing.<br><em>isn\'t</em> = is not &nbsp;·&nbsp; <em>aren\'t</em> = are not<span style="font-family:\'Space Mono\',monospace;font-size:12px;color:var(--accent);display:block;margin-top:6px">She isn\'t sleeping. · They aren\'t talking. · I\'m not eating.</span>',
-    questions: [
-      { context:'She picks up a sandwich.', text:'She ___ drinking water.', blank:'___', options:["isn't",'is',"aren't",'am not'], answer:"isn't" },
-      { context:'Everyone at the party is smiling.', text:'They ___ having fun.', blank:'___', options:['are',"aren't","isn't",'am not'], answer:'are' },
-      { context:'He sits down with a book and opens it.', text:'He ___ reading his book.', blank:'___', options:['is',"isn't","aren't",'am not'], answer:'is' },
-      { context:'The beach is very loud this morning.', text:'The seagulls ___ making a lot of noise.', blank:'___', options:['are',"aren't","isn't",'am not'], answer:'are' },
-      { context:'Two kids sit on the grass watching the others.', text:'Some kids ___ playing frisbee.', blank:'___', options:["aren't",'are',"isn't",'am not'], answer:"aren't" },
-      { context:'I put the chips down and walk away.', text:'I am ___ eating chips.', blank:'___', options:['not','still','also','very'], answer:'not' },
-      { context:'Noah stands completely still, eyes down.', text:'Noah ___ saying anything.', blank:'___', options:["isn't",'is',"aren't",'am not'], answer:"isn't" },
-      { context:'Zane and Lily arrive at the café door.', text:'They ___ waiting at the café.', blank:'___', options:['are',"aren't","isn't",'am not'], answer:'are' },
-      { context:'Mrs Malady slams the door and shouts.', text:'Mrs Malady ___ laughing.', blank:'___', options:["isn't",'is',"aren't",'am not'], answer:"isn't" },
-      { context:"Hugo's eyes are black. He doesn't move.", text:'Hugo ___ talking.', blank:'___', options:["isn't",'is',"aren't",'am not'], answer:"isn't" },
-    ]
-  },
-  {
-    id: 4, name: 'Now or Always?', label: 'Simple present or present progressive?',
-    rule: '<strong>Simple present</strong> = routines, habits, always/usually/never.<br><strong>Present progressive</strong> = happening right now, at this moment.<span style="font-family:\'Space Mono\',monospace;font-size:12px;color:var(--accent);display:block;margin-top:6px">She usually walks to school. · But today she is taking the bus.</span>',
-    questions: [
-      { context:'Right now — at this moment', text:'Look! She ___ a selfie.', blank:'___', options:['is taking','takes','take','taking'], answer:'is taking' },
-      { context:'Every day — a habit', text:'He usually ___ lunch at school.', blank:'___', options:['has','is having','having','have'], answer:'has' },
-      { context:'At this moment', text:'They ___ football right now.', blank:'___', options:['are playing','play','plays','playing'], answer:'are playing' },
-      { context:'Always — a routine', text:'She always ___ her teeth before bed.', blank:'___', options:['brushes','is brushing','brush','brushing'], answer:'brushes' },
-      { context:'At this moment', text:"The dog ___ right now — it's very loud.", blank:'___', options:['is barking','barks','bark','barking'], answer:'is barking' },
-      { context:'A general fact', text:'Noah never ___ Alice first.', blank:'___', options:['texts','is texting','text','texting'], answer:'texts' },
-      { context:'Right now', text:'Wait — someone ___ the door.', blank:'___', options:['is opening','opens','open','opening'], answer:'is opening' },
-      { context:'Every Sunday — a routine', text:'We usually ___ fish and chips on Sundays.', blank:'___', options:['eat','are eating','eating','eats'], answer:'eat' },
-      { context:'At this moment', text:'Look at Zane. He ___ to Lily!', blank:'___', options:['is talking','talks','talk','talking'], answer:'is talking' },
-      { context:'A habit', text:'She often ___ her hair in the morning.', blank:'___', options:['dries','is drying','dry','drying'], answer:'dries' },
-    ]
+
+function renderBossCourt(q, po) {
+  // Grammar Court: two posts shown, tap the wrong one
+  document.getElementById('playerQText').innerHTML=
+    `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--rb);display:block;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">⚖️ Grammar Court</span>${q.scenario}`;
+  po.style.display='none';
+  // Render as two post-cards inside a container
+  const container = document.createElement('div');
+  container.style.cssText='width:100%;display:flex;flex-direction:column;gap:1px;margin-bottom:1px;background:var(--border)';
+  (q.answers||[]).forEach((a,i)=>{
+    const card = document.createElement('div');
+    card.style.cssText='background:var(--surface);padding:16px;cursor:pointer;transition:background 0.1s;border-left:3px solid transparent';
+    card.innerHTML=`<div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700">${esc(a.name)}</div><div style="font-size:15px;font-weight:600;line-height:1.4">"${esc(a.text)}"</div>`;
+    card.onmouseover=()=>{if(!card.dataset.locked)card.style.background='var(--raised)'};
+    card.onmouseout=()=>{if(!card.dataset.locked)card.style.background='var(--surface)'};
+    card.onclick=()=>submitBossCourtVerdict(i, card, q, container);
+    container.appendChild(card);
+  });
+  // Insert after playerPostCard
+  const postCard = document.getElementById('playerPostCard');
+  postCard.parentNode.insertBefore(container, postCard.nextSibling);
+  window._bossContainer = container;
+}
+
+
+
+function submitBossCourtVerdict(idx, card, q, container) {
+  if(playerAnswered) return;
+  const isCorrect = idx === q.wrongIdx;
+  // Lock all cards
+  Array.from(container.children).forEach((c,i)=>{
+    c.dataset.locked='1';c.style.cursor='not-allowed';
+    if(i===q.wrongIdx) c.style.borderLeftColor='var(--wrong)';
+  });
+  if(isCorrect){
+    card.style.background='var(--wrong-dim)';card.style.borderLeftColor='var(--wrong)';
+    // Show why options
+    document.getElementById('playerFeedback').textContent='✓ Correct — now say why';
+    document.getElementById('playerFeedback').className='pfeedback fb-correct';
+    // Render why tiles
+    const jw=document.getElementById('justifyWrap');jw.style.display='block';
+    document.getElementById('justifyTiles').innerHTML=(q.whyOptions||[]).map((w,i)=>
+      `<div class="j-tile" onclick="submitBossCourtWhy(${i},this,${q.correctWhy},'${(q.explanation||'').replace(/'/g,"\'")}',${q.correctWhy})">${w}</div>`
+    ).join('');
+    db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:idx,time:Date.now()});
+  } else {
+    card.style.background='var(--wrong-dim)';
+    document.getElementById('playerFeedback').textContent='✗ Wrong — that one is correct';
+    document.getElementById('playerFeedback').className='pfeedback fb-wrong';
+    flashScreen('red');
+    playerAnswered=true;
+    db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:idx,time:Date.now(),wrong:true});
   }
-];
-
-let solo = {
-  currentRound:0, currentQuestion:0, lives:3, score:0,
-  streak:0, bestStreak:0, totalCorrect:0, answered:false,
-  timer:null, timerValue:100, roundsCompleted:0, shuffledQuestions:[],
-};
-
-function startSolo() {
-  solo = {
-    currentRound:0, currentQuestion:0, lives:3, score:0,
-    streak:0, bestStreak:0, totalCorrect:0, answered:false,
-    timer:null, timerValue:100, roundsCompleted:0, shuffledQuestions:[],
-  };
-  sShowRoundTransition();
 }
 
-function sShowRoundTransition() {
-  const round = SOLO_ROUNDS[solo.currentRound];
-  setRoundColor(round.id);
-  document.getElementById('s-roundBig').textContent = `Round 0${round.id} / 04`;
-  document.getElementById('s-roundTitleBig').textContent = round.name;
-  document.getElementById('s-roundRule').innerHTML = round.rule;
-  goTo('s-round-screen');
-}
 
-function sBeginRound() {
-  const round = SOLO_ROUNDS[solo.currentRound];
-  solo.shuffledQuestions = shuffle(round.questions);
-  solo.currentQuestion = 0;
-  solo.answered = false;
-  goTo('s-game-screen');
-  sRenderQuestion();
-}
 
-function sRenderQuestion() {
-  const round = SOLO_ROUNDS[solo.currentRound];
-  const q = solo.shuffledQuestions[solo.currentQuestion];
-
-  setRoundColor(round.id);
-  document.getElementById('s-roundIndicator').textContent = `Round ${round.id} / 4`;
-  document.getElementById('s-roundLabel').textContent = round.label;
-  document.getElementById('s-scoreDisplay').textContent = solo.score;
-  document.getElementById('s-streakNum').textContent = solo.streak;
-
-  for (let i = 0; i < 3; i++) {
-    const el = document.getElementById('s-life' + i);
-    el.style.background = i >= solo.lives ? 'transparent' : 'var(--red)';
-    el.style.border = i >= solo.lives ? '1px solid var(--muted)' : 'none';
+function submitBossCourtWhy(idx, el, correctWhy, explanation) {
+  if(playerAnswered) return;
+  playerAnswered=true;
+  const ok = idx===correctWhy;
+  document.querySelectorAll('.j-tile').forEach(t=>t.classList.add('locked'));
+  el.classList.add(ok?'j-correct':'j-wrong');
+  document.getElementById('playerFeedback').textContent=ok?'✓ Correct — right verdict, right reason':'✗ Right verdict, wrong reason';
+  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
+  if(ok)flashScreen('green'); else flashScreen('red');
+  if(explanation){
+    setTimeout(()=>{
+      document.getElementById('playerFeedback').textContent=explanation;
+      document.getElementById('playerFeedback').className='pfeedback fb-wait';
+    },1200);
   }
+  db.ref(`rooms/${roomCode}/answers/${playerId}/whyIdx`).set(idx);
+}
 
-  const pct = (solo.currentQuestion / round.questions.length) * 100;
-  document.getElementById('s-progressFill').style.width = pct + '%';
 
-  document.getElementById('s-questionContext').textContent = q.context;
-  document.getElementById('s-questionText').innerHTML = q.text.replace(
-    q.blank,
-    `<span id="s-blankSpan" style="display:inline-block;min-width:120px;border-bottom:3px solid var(--rc);color:var(--rc);text-align:center;padding:0 8px;vertical-align:bottom;transition:all 0.2s">${q.blank}</span>`
-  );
-  document.getElementById('s-feedbackRow').textContent = '';
-  document.getElementById('s-feedbackRow').style.color = '';
-  document.getElementById('s-questionCard').style.borderTop = '3px solid var(--rc)';
 
-  const opts = shuffle(q.options);
-  const grid = document.getElementById('s-optionsGrid');
-  grid.innerHTML = '';
-  opts.forEach(opt => {
-    const btn = document.createElement('button');
-    btn.style.cssText = `background:var(--rc-dim);border:2px solid var(--rc-border);color:var(--text);font-family:'Syne',sans-serif;font-weight:700;font-size:clamp(15px,3vw,19px);padding:20px 16px;cursor:pointer;transition:all 0.15s;text-align:center;border-radius:4px`;
-    btn.textContent = opt;
-    btn.onmouseover = () => { if (!btn.disabled) { btn.style.borderColor='var(--rc)'; btn.style.color='var(--rc)'; btn.style.transform='translateY(-2px)'; }};
-    btn.onmouseout  = () => { if (!btn.disabled) { btn.style.borderColor='var(--rc-border)'; btn.style.color='var(--text)'; btn.style.transform=''; }};
-    btn.onclick = () => sHandleAnswer(opt, q);
+function renderBossDetective(q, po) {
+  document.getElementById('playerQText').innerHTML=
+    `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--rb);display:block;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">🔍 Feed Detective</span>${q.intro}`;
+  po.style.display='none';
+  // Render posts as mini post cards
+  const feed = document.createElement('div');
+  feed.style.cssText='width:100%;display:flex;flex-direction:column;gap:1px;margin-bottom:12px;background:var(--border)';
+  (q.posts||[]).forEach(p=>{
+    const card=document.createElement('div');
+    card.style.cssText='background:var(--surface);padding:12px 16px';
+    card.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--rc);font-weight:700">${esc(p.handle)}</span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">${esc(p.time)}</span></div><div style="font-size:14px;font-weight:500;line-height:1.4">${esc(p.text)}</div>`;
+    feed.appendChild(card);
+  });
+  // Question below feed
+  const qBox=document.createElement('div');
+  qBox.style.cssText='width:100%;padding:14px 16px;background:var(--raised);border-bottom:1px solid var(--border);font-size:14px;font-weight:600;margin-bottom:1px';
+  qBox.textContent=q.question;
+  const optsGrid=document.createElement('div');
+  optsGrid.style.cssText='width:100%;display:flex;flex-direction:column;gap:1px;background:var(--border)';
+  (q.options||[]).map((o,i)=>{
+    const btn=document.createElement('button');
+    btn.className='p-opt';
+    btn.style.cssText='text-align:left;font-size:14px;padding:16px;grid-column:auto';
+    btn.textContent=o;
+    btn.onclick=()=>submitDetective(i,btn,q.answer,q.explanation||'');
+    optsGrid.appendChild(btn);
+    return btn;
+  });
+  const postCard=document.getElementById('playerPostCard');
+  postCard.parentNode.insertBefore(feed,postCard.nextSibling);
+  postCard.parentNode.insertBefore(qBox,feed.nextSibling);
+  postCard.parentNode.insertBefore(optsGrid,qBox.nextSibling);
+  window._bossContainer=feed;
+}
+
+
+
+function submitDetective(idx, btn, correct, explanation) {
+  if(playerAnswered) return;
+  playerAnswered=true;
+  const ok=idx===correct;
+  // Disable all sibling buttons
+  btn.parentNode.querySelectorAll('button').forEach(b=>{
+    b.disabled=true;
+    if(b===btn){b.style.background=ok?'var(--correct-dim)':'var(--wrong-dim)';b.style.color=ok?'var(--correct)':'var(--wrong)';}
+    else if(b.textContent===(Array.isArray(btn.parentNode.querySelectorAll('button'))?btn.parentNode.querySelectorAll('button')[correct]:null)){b.style.background='var(--correct-dim)';b.style.color='var(--correct)';}
+  });
+  // Highlight correct
+  Array.from(btn.parentNode.querySelectorAll('button')).forEach((b,i)=>{if(i===correct){b.style.background='var(--correct-dim)';b.style.color='var(--correct)';}});
+  document.getElementById('playerFeedback').textContent=ok?'✓ Correct':'✗ Wrong';
+  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
+  flashScreen(ok?'green':'red');
+  if(explanation){setTimeout(()=>{document.getElementById('playerFeedback').textContent=explanation;document.getElementById('playerFeedback').className='pfeedback fb-wait';},1200);}
+  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:idx,time:Date.now()});
+}
+
+
+
+function renderBossImpossible(q, po) {
+  document.getElementById('playerQText').innerHTML=
+    `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--rb);display:block;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">🚫 Impossible Sentence</span>${q.prompt}`;
+  po.style.display='none';
+  const grid=document.createElement('div');
+  grid.style.cssText='width:100%;display:flex;flex-direction:column;gap:1px;margin-bottom:1px;background:var(--border)';
+  (q.sentences||[]).forEach((s,i)=>{
+    const btn=document.createElement('button');
+    btn.className='p-opt';
+    btn.style.cssText='text-align:left;font-size:15px;padding:18px 16px;font-family:"Inter",sans-serif;font-weight:500';
+    btn.innerHTML=`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:4px">${String.fromCharCode(65+i)}</span>${esc(s)}`;
+    btn.onclick=()=>submitImpossible(i,btn,q.answer,q.explanation||'',grid);
     grid.appendChild(btn);
   });
-
-  solo.answered = false;
-
-  clearInterval(solo.timer);
-  solo.timerValue = 100;
-  const bar = document.getElementById('s-timerBar');
-  bar.style.width = '100%';
-  bar.style.background = 'var(--rc)';
-
-  solo.timer = setInterval(() => {
-    solo.timerValue -= 1;
-    bar.style.width = solo.timerValue + '%';
-    if (solo.timerValue <= 25) bar.style.background = 'var(--red)';
-    if (solo.timerValue <= 0) { clearInterval(solo.timer); sHandleTimeout(q); }
-  }, 100);
+  const postCard=document.getElementById('playerPostCard');
+  postCard.parentNode.insertBefore(grid,postCard.nextSibling);
+  window._bossContainer=grid;
 }
 
-function sHandleTimeout(q) {
-  if (solo.answered) return;
-  solo.answered = true;
-  sRevealCorrect(q);
-  flashScreen('red');
-  sLoseLife();
-  setTimeout(() => sNextQuestion(), 1800);
-}
 
-function sHandleAnswer(chosen, q) {
-  if (solo.answered) return;
-  solo.answered = true;
-  clearInterval(solo.timer);
 
-  const isCorrect = chosen === q.answer;
-  const blank = document.getElementById('s-blankSpan');
-  if (blank) {
-    blank.textContent = chosen;
-    blank.style.color = isCorrect ? 'var(--green)' : 'var(--red)';
-    blank.style.borderBottomColor = isCorrect ? 'var(--green)' : 'var(--red)';
-  }
-
-  document.querySelectorAll('#s-optionsGrid button').forEach(btn => {
-    btn.disabled = true; btn.style.cursor = 'not-allowed';
-    if (btn.textContent === q.answer) {
-      btn.style.background='var(--green-dim)'; btn.style.borderColor='var(--green)'; btn.style.color='var(--green)';
-    } else if (btn.textContent === chosen && !isCorrect) {
-      btn.style.background='var(--red-dim)'; btn.style.borderColor='var(--red)'; btn.style.color='var(--red)';
-    }
+function submitImpossible(idx, btn, correct, explanation, grid) {
+  if(playerAnswered) return;
+  playerAnswered=true;
+  const ok=idx===correct;
+  grid.querySelectorAll('button').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===correct){b.style.background='var(--wrong-dim)';b.style.color='var(--wrong)';}
   });
-
-  const fb = document.getElementById('s-feedbackRow');
-  if (isCorrect) {
-    solo.streak++; solo.totalCorrect++;
-    if (solo.streak > solo.bestStreak) solo.bestStreak = solo.streak;
-    const pts = 10 + (solo.streak > 1 ? (solo.streak-1)*2 : 0);
-    solo.score += pts;
-    document.getElementById('s-scoreDisplay').textContent = solo.score;
-    document.getElementById('s-streakNum').textContent = solo.streak;
-    fb.textContent = solo.streak > 2 ? `✓ Correct! +${pts} (streak ×${solo.streak})` : `✓ Correct! +${pts}`;
-    fb.style.color = 'var(--green)';
+  if(ok){
+    btn.style.background='var(--wrong-dim)';btn.style.color='var(--wrong)';
+    document.getElementById('playerFeedback').textContent='✓ Found it!';
+    document.getElementById('playerFeedback').className='pfeedback fb-correct';
     flashScreen('green');
-    setTimeout(() => sNextQuestion(), 900);
   } else {
-    solo.streak = 0;
-    document.getElementById('s-streakNum').textContent = 0;
-    fb.textContent = `✗ The answer is: ${q.answer}`;
-    fb.style.color = 'var(--red)';
+    document.getElementById('playerFeedback').textContent='✗ That one is possible — the impossible one is highlighted';
+    document.getElementById('playerFeedback').className='pfeedback fb-wrong';
     flashScreen('red');
-    sLoseLife();
-    setTimeout(() => sNextQuestion(), 1800);
+  }
+  if(explanation){setTimeout(()=>{document.getElementById('playerFeedback').textContent=explanation;document.getElementById('playerFeedback').className='pfeedback fb-wait';},1200);}
+  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:idx,time:Date.now()});
+}
+
+
+
+function cleanBossUI() {
+  if(window._bossContainer){
+    try{window._bossContainer.parentNode.removeChild(window._bossContainer);}catch(e){}
+    window._bossContainer=null;
+  }
+  // Remove any extra inserted nodes between playerPostCard and playerOptions
+  const postCard=document.getElementById('playerPostCard');
+  const pOpts=document.getElementById('playerOptions');
+  if(postCard&&pOpts){
+    let node=postCard.nextSibling;
+    while(node&&node!==document.getElementById('swipeArea')&&node!==pOpts){
+      const next=node.nextSibling;
+      if(node.nodeType===1&&!['playerOptions','swipeArea','sortWrap','boss-input-wrap','justifyWrap'].includes(node.id)){
+        node.parentNode.removeChild(node);
+      }
+      node=next;
+    }
   }
 }
 
-function sRevealCorrect(q) {
-  const blank = document.getElementById('s-blankSpan');
-  if (blank) { blank.textContent=q.answer; blank.style.color='var(--green)'; blank.style.borderBottomColor='var(--green)'; }
-  document.querySelectorAll('#s-optionsGrid button').forEach(btn => {
-    btn.disabled = true;
-    if (btn.textContent === q.answer) { btn.style.background='var(--green-dim)'; btn.style.borderColor='var(--green)'; btn.style.color='var(--green)'; }
-  });
-  const fb = document.getElementById('s-feedbackRow');
-  fb.textContent = `Time's up. The answer was: ${q.answer}`;
-  fb.style.color = 'var(--red)';
-}
 
-function sLoseLife() {
-  if (solo.lives > 0) {
-    solo.lives--;
-    const el = document.getElementById('s-life' + solo.lives);
-    if (el) { el.style.background='transparent'; el.style.border='1px solid var(--muted)'; }
+
+
+// ═══════════════════════
+// STUDENT INIT
+// ═══════════════════════
+const STUDENT_JOIN_URL = window.location.href.split('?')[0]; // base URL for QR target
+
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const pin = params.get('pin');
+  if (pin) {
+    // Came from QR code scan — go straight to join with PIN pre-filled
+    goTo('join-screen');
+    const codeEl = document.getElementById('joinCode');
+    if (codeEl) codeEl.value = pin.toUpperCase();
+    setTimeout(() => {
+      const nameEl = document.getElementById('joinName');
+      if (nameEl) nameEl.focus();
+    }, 200);
   }
-  if (solo.lives <= 0) {
-    clearInterval(solo.timer);
-    solo.roundsCompleted = solo.currentRound + 1;
-    setTimeout(() => sShowEndScreen(), 2000);
-  }
-}
+  // Otherwise show default menu (join + solo)
+});
 
-function sNextQuestion() {
-  if (solo.lives <= 0) return;
-  solo.currentQuestion++;
-  const round = SOLO_ROUNDS[solo.currentRound];
-  if (solo.currentQuestion >= round.questions.length) {
-    solo.roundsCompleted = solo.currentRound + 1;
-    solo.currentRound++;
-    solo.currentRound >= SOLO_ROUNDS.length ? sShowEndScreen() : sShowRoundTransition();
-  } else {
-    sRenderQuestion();
-  }
-}
-
-function sShowEndScreen() {
-  clearInterval(solo.timer);
-  const total = solo.roundsCompleted * 10;
-  const pct = total > 0 ? Math.round((solo.totalCorrect / total) * 100) : 0;
-  let grade, gradeColor, label, message;
-  if (pct >= 90)      { grade='S'; gradeColor='var(--green)';  label='Outstanding'; message="You've got the present progressive under control. Every form, every spelling group. Excellent work."; }
-  else if (pct >= 75) { grade='A'; gradeColor='var(--green)';  label='Strong';       message="Really solid. A few small gaps — play again and you'll iron them out."; }
-  else if (pct >= 60) { grade='B'; gradeColor='var(--accent)'; label='Good';         message="You've got the basics. Push for the trickier forms — spelling groups and the now/always contrast."; }
-  else if (pct >= 45) { grade='C'; gradeColor='var(--blue)';   label='Keep going';   message="Some things are clicking. Play again — focus on the rounds where you lost lives."; }
-  else                { grade='D'; gradeColor='var(--red)';    label='Try again';    message="The present progressive takes practice. Start with Round 1 and build from there. You've got this."; }
-
-  document.getElementById('s-endGrade').textContent = grade;
-  document.getElementById('s-endGrade').style.color = gradeColor;
-  document.getElementById('s-endLabel').textContent = `${label} · ${pct}%`;
-  document.getElementById('s-finalScore').textContent = solo.score;
-  document.getElementById('s-finalCorrect').textContent = solo.totalCorrect;
-  document.getElementById('s-finalStreak').textContent = solo.bestStreak;
-  document.getElementById('s-finalRounds').textContent = solo.roundsCompleted;
-  document.getElementById('s-endMessage').textContent = message;
-  goTo('s-end-screen');
-}
 </script>
 </body>
 </html>

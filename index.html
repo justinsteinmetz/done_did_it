@@ -305,32 +305,8 @@ select{width:100%;background:var(--raised);border:1px solid var(--border-bright)
       <span class="logo-eyebrow">Present Perfect vs Past Simple</span>
       <div class="logo">DONE<br><em>DID IT</em></div>
     </div>
-    <div class="menu-grid">
-      <button class="btn btn-accent" onclick="goTo('host-setup')">Host</button>
-      <button class="btn btn-secondary" onclick="goTo('join-screen')">Join</button>
-    </div>
-    <button class="btn btn-secondary" onclick="startSolo()">Solo — play alone</button>
-  </div>
-
-  <!-- ════ HOST SETUP ════ -->
-  <div class="screen" id="host-setup" style="padding:40px 16px 0">
-    <div style="width:100%;margin-bottom:20px"><span class="logo-eyebrow" style="margin-top:20px">Host</span><div class="logo">a<br><em>game</em></div></div>
-    <div style="width:100%">
-      <div class="field-label">Number of questions</div>
-      <select id="qCount">
-        <option value="10">10 — Quick</option>
-        <option value="20" selected>20 — Standard</option>
-        <option value="40">40 — Full game</option>
-      </select>
-      <div class="field-label">Time per question</div>
-      <select id="qTime">
-        <option value="8000">8 seconds</option>
-        <option value="12000" selected>12 seconds</option>
-        <option value="18000">18 seconds</option>
-      </select>
-    </div>
-    <button class="btn btn-accent" onclick="createRoom()" style="margin-top:8px">Create room →</button>
-    <button class="btn-ghost" onclick="goTo('menu')">← Back</button>
+    <button class="btn btn-accent" onclick="goTo('join-screen')" style="margin-bottom:10px">Join a game &#x2192;</button>
+    <button class="btn btn-secondary" onclick="startSolo()">Solo &mdash; play alone</button>
   </div>
 
   <!-- ════ HOST LOBBY ════ -->

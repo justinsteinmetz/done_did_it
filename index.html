@@ -298,39 +298,99 @@ select{width:100%;background:var(--raised);border:1px solid var(--border-bright)
 
 <div class="flash" id="flash"></div>
 <div class="wrap">
-<!-- ════ STUDENT ENTRY (default) ════ -->
-  <div class="screen active" id="menu" style="padding:48px 16px 0">
-    <div style="margin-top:8px;margin-bottom:32px;width:100%">
+
+  <!-- ════ MENU ════ -->
+  <div class="screen active" id="menu" style="text-align:center">
+    <div style="margin-top:40px;margin-bottom:20px;width:100%">
       <span class="logo-eyebrow">Present Perfect vs Past Simple</span>
       <div class="logo">DONE<br><em>DID IT</em></div>
     </div>
-    <button class="btn btn-accent" onclick="goTo('join-screen')" style="margin-bottom:10px">Join a game →</button>
+    <div class="menu-grid">
+      <button class="btn btn-accent" onclick="goTo('host-setup')">Host</button>
+      <button class="btn btn-secondary" onclick="goTo('join-screen')">Join</button>
+    </div>
     <button class="btn btn-secondary" onclick="startSolo()">Solo — play alone</button>
   </div>
 
-  
-<!-- ════ JOIN ════ -->
-  <div class="screen" id="join-screen" style="padding:48px 16px 0">
-    <div style="width:100%;margin-bottom:28px">
-      <span class="logo-eyebrow">Enter your details</span>
-      <div class="logo" style="font-size:clamp(36px,10vw,52px)">Join<br><em>a game</em></div>
+  <!-- ════ HOST SETUP ════ -->
+  <div class="screen" id="host-setup" style="padding:40px 16px 0">
+    <div style="width:100%;margin-bottom:20px"><span class="logo-eyebrow" style="margin-top:20px">Host</span><div class="logo">a<br><em>game</em></div></div>
+    <div style="width:100%">
+      <div class="field-label">Number of questions</div>
+      <select id="qCount">
+        <option value="10">10 — Quick</option>
+        <option value="20" selected>20 — Standard</option>
+        <option value="40">40 — Full game</option>
+      </select>
+      <div class="field-label">Time per question</div>
+      <select id="qTime">
+        <option value="8000">8 seconds</option>
+        <option value="12000" selected>12 seconds</option>
+        <option value="18000">18 seconds</option>
+      </select>
+    </div>
+    <button class="btn btn-accent" onclick="createRoom()" style="margin-top:8px">Create room →</button>
+    <button class="btn-ghost" onclick="goTo('menu')">← Back</button>
+  </div>
+
+  <!-- ════ HOST LOBBY ════ -->
+  <div class="screen" id="host-lobby" style="padding:20px 0 0">
+    <div class="code-card">
+      <div class="code-label">Room code</div>
+      <div class="code-value" id="roomCodeDisplay">----</div>
+      <div class="code-sub">Students: open this page → Join → enter code</div>
     </div>
     <div style="width:100%">
+      <div class="plist-label">Players joined</div>
+      <div class="pchips" id="lobbyPlayers"><span style="font-size:13px;color:var(--muted);font-style:italic">Waiting for players…</span></div>
+    </div>
+    <button class="btn btn-accent" id="startBtn" onclick="startGame()" disabled>Start →</button>
+    <button class="btn-ghost" onclick="cancelRoom()">Cancel</button>
+  </div>
+
+  <!-- ════ HOST GAME ════ -->
+  <div class="screen" id="host-game" style="padding:0">
+    <div class="game-header">
+      <div class="round-tag" id="hostRoundTag">Round 1</div>
+      <div class="q-counter" id="hostQCounter">1 / 20</div>
+      <div class="ans-count" id="hostAnswersIn">0 answers</div>
+    </div>
+    <div class="timer-wrap"><div class="timer-fill" id="hostTimerBar" style="width:100%"></div></div>
+    <div class="post-card anim-in" id="hostQCard">
+      <div class="post-header">
+        <div class="post-avatar" id="hostAvatar">💬</div>
+        <div>
+          <div class="post-handle" id="hostHandle">@scene</div>
+        </div>
+        <div class="post-time" id="hostQCtxTime">now</div>
+      </div>
+      <div class="post-body">
+        <div class="post-context" id="hostQCtx"></div>
+        <div class="post-text" id="hostQText"></div>
+      </div>
+    </div>
+    <div class="host-opts" id="hostOpts"></div>
+    <div id="bossCloud" class="boss-cloud" style="display:none"></div>
+    <div class="divider"></div>
+    <div class="lb-label">Live scores</div>
+    <div class="lb-card"><div id="hostLeaderboard"></div></div>
+  </div>
+
+  <!-- ════ JOIN ════ -->
+  <div class="screen" id="join-screen" style="padding:40px 16px 0">
+    <div style="width:100%;margin-bottom:20px"><span class="logo-eyebrow" style="margin-top:20px">Join</span><div class="logo">a<br><em>game</em></div></div>
+    <div style="width:100%">
       <div class="field-label">Your name</div>
-      <input type="text" id="joinName" placeholder="Your name" maxlength="16"
-        autocomplete="off" autocorrect="off" autocapitalize="words">
-      <div class="field-label">Game PIN</div>
-      <input type="text" id="joinCode" placeholder="4-letter PIN" maxlength="4" oninput="this.value=this.value.toUpperCase()"
-        autocomplete="off" autocorrect="off" autocapitalize="characters"
-        style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase">
+      <input type="text" id="joinName" placeholder="Your name" maxlength="16" autocomplete="off" autocorrect="off">
+      <div class="field-label">Room code</div>
+      <input type="text" id="joinCode" placeholder="4-letter code" maxlength="4" autocomplete="off" autocorrect="off" autocapitalize="characters">
       <div class="err" id="joinError"></div>
       <button class="btn btn-accent" onclick="joinRoom()">Join →</button>
       <button class="btn-ghost" onclick="goTo('menu')">← Back</button>
     </div>
   </div>
 
-  
-<!-- ════ PLAYER WAITING ════ -->
+  <!-- ════ PLAYER WAITING ════ -->
   <div class="screen" id="player-waiting" style="text-align:center;padding:60px 16px 0">
     <div style="margin-top:40px">
       <div class="notif-pill">✓ You're in</div>
@@ -344,8 +404,7 @@ select{width:100%;background:var(--raised);border:1px solid var(--border-bright)
     </div>
   </div>
 
-  
-<!-- ════ PLAYER GAME ════ -->
+  <!-- ════ PLAYER GAME ════ -->
   <div class="screen" id="player-game" style="width:100%">
     <div class="timer-wrap" style="margin-bottom:14px"><div class="timer-fill" id="playerTimerBar" style="width:100%"></div></div>
 
@@ -396,8 +455,16 @@ select{width:100%;background:var(--raised);border:1px solid var(--border-bright)
     </div>
   </div>
 
-  
-<!-- ════ SOLO ROUND SCREEN ════ -->
+  <!-- ════ HOST END ════ -->
+  <div class="screen" id="end" style="text-align:center;padding:40px 16px 0">
+    <div class="end-grade">🏆</div>
+    <div class="end-sub" id="endSubtitle">Game over</div>
+    <div class="section-title">Final scores</div>
+    <div id="finalLeaderboard" style="width:100%;margin-bottom:24px"></div>
+    <div style="padding:0 16px;width:100%"><button class="btn btn-accent" onclick="location.reload()">Play again</button></div>
+  </div>
+
+  <!-- ════ SOLO ROUND SCREEN ════ -->
   <div class="screen" id="s-round-screen">
     <div class="rt-hero" id="s-roundHero">
       <div class="rt-round-num" id="s-roundNum">Round 01 / 05</div>
@@ -411,8 +478,7 @@ select{width:100%;background:var(--raised);border:1px solid var(--border-bright)
     </div>
   </div>
 
-  
-<!-- ════ SOLO GAME ════ -->
+  <!-- ════ SOLO GAME ════ -->
   <div class="screen" id="s-game-screen" style="width:100%;padding:0">
     <div class="solo-header">
       <div class="round-tag" id="s-roundIndicator" style="font-size:11px;font-weight:800;padding:5px 12px">Round 1 / 5</div>
@@ -449,8 +515,7 @@ select{width:100%;background:var(--raised);border:1px solid var(--border-bright)
     </div>
   </div>
 
-  
-<!-- ════ SOLO END ════ -->
+  <!-- ════ SOLO END ════ -->
   <div class="screen" id="s-end-screen" style="text-align:center;padding:40px 16px 0">
     <div class="end-grade" id="s-endGrade" style="margin-top:20px">S</div>
     <div class="end-sub" id="s-endLabel">Fluent</div>
@@ -470,14 +535,9 @@ select{width:100%;background:var(--raised);border:1px solid var(--border-bright)
     <button class="btn-ghost" onclick="goTo('menu')" style="margin-top:4px">← Menu</button>
   </div>
 
-
-
 </div><!-- /wrap -->
 
 <script>
-"use strict";
-
-
 'use strict';
 
 // HTML escape
@@ -487,7 +547,6 @@ function esc(s) {
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
     .replace(/'/g,'&#39;');
 }
-
 
 // ═══════════════════════
 // FIREBASE
@@ -503,8 +562,6 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-
-// Init called per-file
 
 // ═══════════════════════
 // ROUND CONFIG
@@ -550,7 +607,7 @@ const R1_QUESTIONS = [
   { context:"A notification pops up: 'New comment on your post.'", text:"Someone ___ your photo — they say it's fire.", answer:"liked", options:["liked","has liked","likes","is liking"] },
   { context:"The Wi-Fi goes down mid-lesson. Everyone groans.", text:"The connection ___ — we'll have to restart everything.", answer:"has dropped", options:["has dropped","dropped","drops","was dropping"] },
   { context:"Jada opens YouTube. The video she was watching is gone.", text:"The creator ___ the video — it's not there anymore.", answer:"has deleted", options:["has deleted","deleted","deletes","was deleting"] },
-  { context:"An old friend messages you out of nowhere.", text:"I ___ you ages — how are you?", answer:"haven't seen", options:["haven't seen","didn't see","don't see","wasn't seeing"] },
+  { context:"An old friend messages you out of nowhere.", text:"I ___ you for ages — how are you?", answer:"haven't seen", options:["haven't seen","didn't see","don't see","wasn't seeing"] },
   { context:"Leo holds up his phone. The screen is black.", text:"My phone ___  — I can't turn it on.", answer:"has died", options:["has died","died","dies","was dying"] },
   { context:"The teacher checks the register. One seat is empty.", text:"Has anyone ___ where Sam is?", answer:"seen", options:["seen","saw","see","been seeing"] },
   { context:"Everyone is using a new word that appeared last week.", text:"That word ___ everywhere on social media.", answer:"has spread", options:["has spread","spread","spreads","was spreading"] },
@@ -633,7 +690,7 @@ const R3_QUESTIONS = [
     text:"Which question fits?",
     options:["Have you ever seen it?","Did you ever see it?"],
     answer:0,
-    explanation:"'Ever' asking about life experience up to now = Present Perfect."
+    explanation:"'Ever' = life experience up to now = Present Perfect. Even though the film is old, the question is about the person's experience — not when the film came out."
   },
   {
     context:"A YouTuber posted a video 4 days ago. You're recommending it to a friend today.",
@@ -703,8 +760,8 @@ const R4_QUESTIONS = [
     explanation:"Visible present consequence — the injury is still affecting them. That's what PP expresses."
   },
   {
-    context:"The teacher asks the class to remember something from a previous lesson.", text:"We ___ this last lesson — it was on the board.", answer:"did",
-    options:["did","have done"],
+    context:"The teacher asks the class to remember something from a previous lesson.", text:"We ___ this last lesson — it was on the board.", answer:"covered",
+    options:["covered","have covered"],
     justifyOptions:["Last lesson is a specific closed past event","We're still doing it now","No specific time is mentioned","The result is relevant now"],
     correctJustify:0,
     explanation:"'Last lesson' is a specific finished time — Past Simple."
@@ -881,12 +938,12 @@ const BOSS_IMPOSSIBLE = [
     bossType:"impossible",
     prompt:"One of these sentences is IMPOSSIBLE in English. Which one?",
     sentences:[
-      "Did you ever try spicy food?",
-      "Have you ever tried spicy food?",
-      "Have you tried spicy food before?"
+      "I have visited my grandma yesterday.",
+      "I visited my grandma yesterday.",
+      "I have visited my grandma this week."
     ],
     answer:0,
-    explanation:"'Ever' with life experience needs Present Perfect. 'Did you ever try' is grammatically possible but sounds unnatural and is typically considered incorrect in standard English — 'Have you ever tried' is the correct form."
+    explanation:"'Yesterday' is a specific finished past time. Present Perfect is impossible with it — you cannot say 'I have visited... yesterday.' Switch to Past Simple: 'I visited my grandma yesterday.'"
   },
   {
     bossType:"impossible",
@@ -969,7 +1026,7 @@ const R5_QUESTIONS = [
   {
     context:"Your friend looks exhausted. They clearly haven't slept.",
     text:"What do you ask?",
-    options:["Did you sleep last night?","Have you slept?","Were you sleeping?","Do you sleep?"],
+    options:["Did you sleep last night?","Have you slept at all?","Were you sleeping?","Do you sleep?"],
     answer:1,
     explanation:"You're asking about their current state — have they slept (up to now)? Present Perfect connects the past event to the present exhaustion."
   },
@@ -1063,20 +1120,681 @@ function buildQueue(total) {
 // ═══════════════════════
 // HOST — CREATE ROOM
 // ═══════════════════════
+function createRoom() {
+  totalQuestions=parseInt(document.getElementById('qCount').value);
+  questionDuration=parseInt(document.getElementById('qTime').value);
+  roomCode=Math.random().toString(36).substring(2,6).toUpperCase();
+  MODE='host';
+  queuedQuestions=buildQueue(totalQuestions);
+  db.ref('rooms/'+roomCode).set({status:'lobby',players:{},currentQ:null,totalQ:totalQuestions,duration:questionDuration});
+  db.ref('rooms/'+roomCode).onDisconnect().remove();
+  document.getElementById('roomCodeDisplay').textContent=roomCode;
+  goTo('host-lobby');
+  db.ref('rooms/'+roomCode+'/players').on('value',snap=>{
+    const players=snap.val()||{};
+    renderLobbyPlayers(players);
+    const btn=document.getElementById('startBtn');
+    btn.disabled=Object.keys(players).length===0;
+  });
+}
+
+function renderLobbyPlayers(players) {
+  const el=document.getElementById('lobbyPlayers');
+  const list=Object.values(players);
+  if(!list.length){el.innerHTML='<span style="font-size:13px;color:var(--muted);font-style:italic">Waiting for players…</span>';return;}
+  el.innerHTML=list.map(p=>`<div class="pchip">${esc(p.name)}</div>`).join('');
+}
+
+function cancelRoom(){if(roomCode)db.ref('rooms/'+roomCode).remove();goTo('menu');}
+
 // ═══════════════════════
 // HOST — GAME
 // ═══════════════════════
+function startGame(){
+  db.ref('rooms/'+roomCode+'/status').set('playing');
+  goTo('host-game');
+  pushQuestion(0);
+}
+
+function pushQuestion(index) {
+  if(index>=queuedQuestions.length){endGame();return;}
+  const q=queuedQuestions[index];
+  currentQIndex=index;
+  questionResolved=false;
+  setRoundColor(q.round);
+
+  const cfg=ROUND_CONFIG[q.round]||ROUND_CONFIG[1];
+  // Flash round change if round changed
+  const prevRound = parseInt(document.getElementById('hostRoundTag').dataset.round||'0');
+  const newRound = q.round;
+  document.getElementById('hostRoundTag').textContent=q.round==='boss'?'🔔 Boss':`Round ${q.round} — ${cfg.name}`;
+  document.getElementById('hostRoundTag').dataset.round=q.round;
+  if(prevRound && prevRound !== newRound && newRound !== 'boss'){
+    document.getElementById('hostRoundTag').style.fontWeight='900';
+    document.getElementById('hostRoundTag').style.fontSize='13px';
+    setTimeout(()=>{document.getElementById('hostRoundTag').style.fontWeight='';document.getElementById('hostRoundTag').style.fontSize='';},1200);
+  }
+  document.getElementById('hostQCounter').textContent=`${index+1} / ${totalQuestions}`;
+  document.getElementById('hostAnswersIn').textContent='0 answers';
+  document.getElementById('hostAvatar').textContent=cfg.avatar;
+  document.getElementById('hostAvatar').style.background=cfg.dim;
+  document.getElementById('hostAvatar').style.borderColor=cfg.border;
+  document.getElementById('hostHandle').textContent=cfg.handle;
+  document.getElementById('hostQCtx').textContent=q.context||'';
+  document.getElementById('bossCloud').style.display='none';
+
+  if(q.type==='binary'){
+    document.getElementById('hostQText').innerHTML=`<em style="font-size:13px;color:var(--muted);font-style:normal;font-family:'JetBrains Mono',monospace;letter-spacing:0.06em">Students classify:</em><br><br>"${q.text}"`;
+  } else if(q.type==='clash'){
+    document.getElementById('hostQText').innerHTML=`${q.context}<br><br><span style="font-size:13px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.06em">Choose the sentence that fits:</span>`;
+  } else {
+    document.getElementById('hostQText').innerHTML=(q.text||'').replace('___',`<span class="post-blank" id="hostBlank">___</span>`);
+  }
+
+  const optsEl=document.getElementById('hostOpts');
+  if(q.type='boss'){
+    let bossLabel = q.bossType==='court' ? '⚖️ Grammar Court — who is wrong?' :
+                    q.bossType==='detective' ? '🔍 Feed Detective — read the posts' :
+                    q.bossType==='impossible' ? '🚫 Impossible Sentence — find it' : '🔔 Boss';
+    optsEl.innerHTML=`<div style="grid-column:1/-1;background:var(--rbd);border:1.5px solid var(--rbb);border-radius:3px;padding:16px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--rb)">
+      ${bossLabel} · 30 points${q.hint?`<br><span style="color:var(--muted);font-size:10px;letter-spacing:0;display:block;margin-top:4px;font-style:italic">${q.hint}</span>`:''}
+    </div>`;
+    document.getElementById('bossCloud').style.display='flex';
+    document.getElementById('bossCloud').innerHTML='';
+  } else if(q.type==='binary'){
+    optsEl.innerHTML=`
+      <div class="host-opt" style="border-color:var(--r1b);color:var(--r1);background:var(--r1d)" id="opt-pp">Present Perfect<span class="opt-count" id="count-pp"></span></div>
+      <div class="host-opt" style="border-color:var(--r2b);color:var(--r2);background:var(--r2d)" id="opt-ps">Past Simple<span class="opt-count" id="count-ps"></span></div>`;
+  } else if(q.type==='clash'){
+    optsEl.innerHTML=(q.options||[]).map((o,i)=>
+      `<div class="host-opt" id="opt-clash-${i}" style="font-size:13px;text-align:left">${o}<span class="opt-count" id="count-clash-${i}"></span></div>`
+    ).join('');
+  } else {
+    optsEl.innerHTML=shuffle(q.options||[]).map(o=>{
+      const key=o.replace(/\s/g,'_').replace(/['/]/g,'');
+      return `<div class="host-opt" id="opt-${key}">${o}<span class="opt-count" id="count-${key}"></span></div>`;
+    }).join('');
+  }
+
+  const startTime=Date.now();
+  currentStartTime=startTime;
+  const fbQ={text:q.text||q.context,context:q.context||'',type:q.type,round:q.round,startTime,index};
+  if(q.type==='boss'){fbQ.answer=q.answer;fbQ.hint=q.hint||null;fbQ.bossType=q.bossType||'complete';}
+  else if(q.type==='binary'){fbQ.answer=q.answer;}
+  else if(q.type==='clash'){fbQ.options=q.options;fbQ.answer=q.answer;}
+  else if(q.type==='justify'){fbQ.options=shuffle(q.options);fbQ.answer=q.answer;fbQ.justifyOptions=q.justifyOptions;fbQ.correctJustify=q.correctJustify;fbQ.explanation=q.explanation||'';}
+  else{fbQ.options=shuffle(q.options);fbQ.answer=q.answer;}
+
+  if(answersListener){db.ref('rooms/'+roomCode+'/answers').off('value',answersListener);answersListener=null;}
+  db.ref('rooms/'+roomCode+'/answers').remove().then(()=>{
+    answersListener=db.ref('rooms/'+roomCode+'/answers').on('value',snap=>{
+      const answers=snap.val()||{};
+      const count=Object.keys(answers).length;
+      document.getElementById('hostAnswersIn').textContent=`${count} answer${count!==1?'s':''}`;
+      if(q.type==='binary'){
+        const ppC=Object.values(answers).filter(a=>a.answer==='pp').length;
+        const psC=Object.values(answers).filter(a=>a.answer==='ps').length;
+        const ppEl=document.getElementById('count-pp');const psEl=document.getElementById('count-ps');
+        if(ppEl)ppEl.textContent=ppC||'';if(psEl)psEl.textContent=psC||'';
+      } else if(q.type==='boss'){
+        const cloud=document.getElementById('bossCloud');
+        if(cloud)cloud.innerHTML=Object.values(answers).map(a=>`<span class="cloud-word ${fuzzyMatch(a.answer,q.answer)?'cloud-correct':''}">${esc(a.answer)}</span>`).join('');
+      } else if(q.type==='clash'){
+        [0,1].forEach(i=>{const c=Object.values(answers).filter(a=>a.answer===i).length;const el=document.getElementById(`count-clash-${i}`);if(el)el.textContent=c||'';});
+      } else {
+        const tally={};Object.values(answers).forEach(a=>{tally[a.answer]=(tally[a.answer]||0)+1;});
+        (q.options||[]).forEach(o=>{const key=o.replace(/\s/g,'_').replace(/['/]/g,'');const el=document.getElementById('count-'+key);if(el)el.textContent=tally[o]||'';});
+      }
+    });
+    db.ref('rooms/'+roomCode+'/currentQ').set(fbQ);
+    startHostTimer(startTime,questionDuration,q);
+  });
+}
+
+function startHostTimer(startTime,duration,q){
+  clearInterval(hostTimerInterval);
+  const bar=document.getElementById('hostTimerBar');
+  bar.className='timer-fill';bar.style.width='100%';
+  hostTimerInterval=setInterval(()=>{
+    const pct=Math.max(0,1-(Date.now()-startTime)/duration);
+    bar.style.width=(pct*100)+'%';
+    if(pct<0.25)bar.className='timer-fill urgent';
+    if(pct<=0){clearInterval(hostTimerInterval);setTimeout(()=>revealAnswer(q,startTime),250);}
+  },80);
+}
+
+function revealAnswer(q,startTime){
+  if(questionResolved)return;
+  questionResolved=true;
+  if(answersListener){db.ref('rooms/'+roomCode+'/answers').off('value',answersListener);answersListener=null;}
+  if(q.type==='binary'){const el=document.getElementById('opt-'+(q.answer==='pp'?'pp':'ps'));if(el)el.classList.add('is-correct');}
+  else if(q.type==='clash'){const el=document.getElementById(`opt-clash-${q.answer}`);if(el)el.classList.add('is-correct');}
+  else if(q.type!=='boss'){
+    const blank=document.getElementById('hostBlank');
+    if(blank){blank.textContent=q.answer;blank.classList.add('correct');}
+    if(q.options){const key=(typeof q.answer==='string')?q.answer.replace(/\s/g,'_').replace(/['/]/g,''):'';const el=key?document.getElementById('opt-'+key):null;if(el)el.classList.add('is-correct');}
+  } else {
+    const blank=document.getElementById('hostBlank');
+    if(blank){blank.textContent=q.answer;blank.classList.add('correct');}
+  }
+  const qStart=startTime||currentStartTime;
+  db.ref('rooms/'+roomCode+'/answers').once('value',snap=>{
+    const answers=snap.val()||{};
+    Object.entries(answers).forEach(([pid,v])=>{
+      let isCorrect=false;
+      if(q.type==='boss'){
+          // Court: correct if right wrongIdx picked AND right why
+          if(q.bossType==='court') isCorrect = v.answer===q.wrongIdx && (v.whyIdx===undefined||v.whyIdx===q.correctWhy);
+          // Detective + Impossible: tap correct index
+          else if(q.bossType==='detective'||q.bossType==='impossible') isCorrect = v.answer===q.answer;
+          // Legacy text boss
+          else isCorrect = fuzzyMatch(v.answer||'', q.answer||'');
+        }
+      else if(q.type==='binary')isCorrect=v.answer===q.answer;
+      else if(q.type==='clash')isCorrect=v.answer===q.answer;
+      else if(q.type==='justify'){
+        isCorrect=v.answer===q.answer;
+        if(isCorrect&&v.justify===q.correctJustify)db.ref(`rooms/${roomCode}/players/${pid}/score`).transaction(s=>(s||0)+5);
+      } else isCorrect=v.answer===q.answer;
+      const base=q.type==='boss'?30:10;
+      let bonus=0;
+      if(q.type!=='boss'&&isCorrect){
+        const elapsed=Math.max(0,v.time-qStart);
+        bonus=elapsed>questionDuration?0:Math.floor((Math.max(0,questionDuration-elapsed)/questionDuration)*5);
+      }
+      if(isCorrect){
+        db.ref(`rooms/${roomCode}/players/${pid}/score`).transaction(s=>(s||0)+base+bonus);
+        db.ref(`rooms/${roomCode}/players/${pid}/streak`).transaction(s=>(s||0)+1);
+      } else {
+        db.ref(`rooms/${roomCode}/players/${pid}/streak`).set(0);
+      }
+    });
+  });
+  db.ref('rooms/'+roomCode+'/currentQ/revealed').set(true);
+  if(q.explanation)db.ref('rooms/'+roomCode+'/currentQ/explanation').set(q.explanation);
+  setTimeout(()=>{renderHostLeaderboard();setTimeout(()=>pushQuestion(currentQIndex+1),2400);},1200);
+}
+
+function renderHostLeaderboard(){
+  db.ref('rooms/'+roomCode+'/players').once('value',snap=>{
+    const players=Object.values(snap.val()||{}).sort((a,b)=>b.score-a.score);
+    document.getElementById('hostLeaderboard').innerHTML=players.slice(0,8).map((p,i)=>
+      `<div class="lb-row ${i===0?'top':''}">
+        <span class="lb-pos">${i+1}</span>
+        <span class="lb-name">${esc(p.name)}</span>
+        <span class="lb-score">${p.score||0}</span>
+      </div>`
+    ).join('');
+  });
+}
+
+function endGame(){
+  clearInterval(hostTimerInterval);
+  db.ref('rooms/'+roomCode+'/status').set('ended');
+  db.ref('rooms/'+roomCode+'/players').once('value',snap=>{
+    const players=Object.values(snap.val()||{}).sort((a,b)=>b.score-a.score);
+    const medals=['🥇','🥈','🥉'];
+    document.getElementById('finalLeaderboard').innerHTML=players.map((p,i)=>
+      `<div class="podium-row ${i<3?'p'+(i+1):''}">
+        <span class="podium-medal">${medals[i]||(i+1)+'.'}</span>
+        <span class="podium-name">${esc(p.name)}</span>
+        <span class="podium-score">${p.score||0}</span>
+      </div>`
+    ).join('');
+    const winner=players[0];
+    document.getElementById('endSubtitle').textContent=winner?`${winner.name} wins — ${winner.score} pts`:'Game complete';
+    goTo('end');
+    db.ref('rooms/'+roomCode).remove();
+  });
+}
+
 // ═══════════════════════
 // PLAYER — JOIN
 // ═══════════════════════
+function joinRoom(){
+  const name=document.getElementById('joinName').value.trim();
+  const code=document.getElementById('joinCode').value.trim().toUpperCase();
+  const err=document.getElementById('joinError');
+  if(!name){err.textContent='Enter your name';return;}
+  if(code.length!==4){err.textContent='Code must be 4 characters';return;}
+  err.textContent='';
+  db.ref('rooms/'+code).once('value',snap=>{
+    if(!snap.exists()){err.textContent='Room not found';return;}
+    if(snap.val().status==='ended'){err.textContent='This game has ended';return;}
+    playerId='p_'+Date.now()+'_'+Math.random().toString(36).substr(2,4);
+    playerName=name;roomCode=code;MODE='player';
+    playerScore=0;playerStreak=0;playerAnswered=false;playerJustified=false;
+    db.ref(`rooms/${code}/players/${playerId}`).set({name,score:0,streak:0});
+    db.ref(`rooms/${code}/players/${playerId}`).onDisconnect().remove();
+    goTo('player-waiting');
+    document.getElementById('playerWaitStatus').textContent='Waiting for host…';
+    document.getElementById('playerScoreWait').textContent='0';
+    listenForGameState();
+  });
+}
+
 // ═══════════════════════
 // PLAYER — LISTEN
 // ═══════════════════════
+function listenForGameState(){
+  stateListener=db.ref('rooms/'+roomCode+'/currentQ').on('value',snap=>{
+    const q=snap.val();if(!q)return;
+    if(!q.revealed){
+      playerAnswered=false;playerJustified=false;currentQ=q;
+      setRoundColor(q.round);
+      goTo('player-game');
+      setPostAvatar('playerAvatar','playerHandle',q.round);
+      renderPlayerQuestion(q);
+      startPlayerTimer(q.startTime);
+    } else {showPlayerReveal(q);}
+  });
+  playerScoreListener=db.ref(`rooms/${roomCode}/players/${playerId}`).on('value',snap=>{
+    const p=snap.val();if(!p)return;
+    playerScore=p.score||0;playerStreak=p.streak||0;
+    document.getElementById('playerScore').textContent=playerScore;
+    document.getElementById('playerStreak').textContent=playerStreak;
+    document.getElementById('playerScoreWait').textContent=playerScore;
+  });
+  playerStatusListener=db.ref('rooms/'+roomCode+'/status').on('value',snap=>{
+    if(snap.val()==='ended')showPlayerEnd();
+  });
+}
+
+function renderPlayerQuestion(q){
+  cleanBossUI();
+  const po=document.getElementById('playerOptions');
+  po.innerHTML='';po.style.display='grid';
+  po.style.gridTemplateColumns='1fr 1fr';
+  document.getElementById('swipeArea').style.display='none';
+  document.getElementById('sortWrap').style.display='none';
+  document.getElementById('boss-input-wrap').style.display='none';
+  document.getElementById('justifyWrap').style.display='none';
+  document.getElementById('playerFeedback').textContent='';
+  document.getElementById('playerFeedback').className='pfeedback';
+
+  if(q.type==='binary'){
+    document.getElementById('playerQText').innerHTML=
+      `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:12px;letter-spacing:0.1em;text-transform:uppercase">Present Perfect or Past Simple?</span><strong>"${q.text}"</strong>`;
+    po.style.display='none';
+    const sa=document.getElementById('swipeArea');sa.style.display='flex';
+    document.getElementById('swipePP').disabled=false;
+    document.getElementById('swipePS').disabled=false;
+    document.getElementById('swipePP').className='swipe-btn swipe-pp';
+    document.getElementById('swipePS').className='swipe-btn swipe-ps';
+  } else if(q.type==='clash'){
+    document.getElementById('playerQText').innerHTML=
+      `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase">Which fits the scene?</span>${q.context}`;
+    po.style.display='grid';
+    po.style.gridTemplateColumns='1fr';
+    po.innerHTML=(q.options||[]).map((o,i)=>
+      `<button class="p-opt" onclick="submitClash(${i},this,${q.answer})" style="text-align:left;font-size:14px">${o}</button>`
+    ).join('');
+  } else if(q.type==='boss'){
+    if(q.bossType==='court'){
+      renderBossCourt(q, po);
+    } else if(q.bossType==='detective'){
+      renderBossDetective(q, po);
+    } else if(q.bossType==='impossible'){
+      renderBossImpossible(q, po);
+    } else {
+      // Legacy text-input boss
+      document.getElementById('playerQText').innerHTML=
+        `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--rb);display:block;margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase">🔔 Boss question</span>${q.text}`;
+      po.style.display='none';
+      const biw=document.getElementById('boss-input-wrap');biw.style.display='block';
+      const bi=document.getElementById('bossInput');bi.value='';bi.disabled=false;
+      document.getElementById('bossHint').textContent=q.hint?`Hint: ${q.hint}`:'';
+      biw.querySelector('button').disabled=false;
+      setTimeout(()=>bi.focus(),150);
+    }
+  } else if(q.type==='justify'){
+    document.getElementById('playerQText').innerHTML=
+      (q.context?`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase">${q.context}</span>`:'')
+      +(q.text||'').replace('___',`<span style="border-bottom:2.5px solid var(--rc);color:var(--rc);padding:0 6px">___</span>`);
+    po.innerHTML=(q.options||[]).map(o=>
+      `<button class="p-opt" onclick="submitJustify('${o.replace(/'/g,"\\'")}',this,'${(q.answer||'').replace(/'/g,"\\'")}')"> ${o}</button>`
+    ).join('');
+  } else if(q.type==='nolabels'){
+    document.getElementById('playerQText').innerHTML=
+      (q.context?`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">${q.context}</span>`:'')
+      +(q.text||'');
+    po.style.gridTemplateColumns='1fr';
+    po.innerHTML=(q.options||[]).map(o=>
+      `<button class="p-opt" onclick="submitAnswer('${o.replace(/'/g,"\'")}',this,'${(q.answer||'').replace(/'/g,"\'")}'" style="text-align:left;font-size:15px;padding:18px 16px">${o}</button>`
+    ).join('');
+  } else {
+    document.getElementById('playerQText').innerHTML=
+      (q.context?`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase">${q.context}</span>`:'')
+      +(q.text||'').replace('___',`<span style="border-bottom:2.5px solid var(--rc);color:var(--rc);padding:0 6px;font-style:italic">___</span>`);
+    po.innerHTML=(q.options||[]).map(o=>
+      `<button class="p-opt" onclick="submitAnswer('${o.replace(/'/g,"\\'")}',this,'${(q.answer||'').replace(/'/g,"\\'")}')"> ${o}</button>`
+    ).join('');
+  }
+}
+
 // ═══════════════════════
 // BOSS RENDER FUNCTIONS
 // ═══════════════════════
 
+function renderBossCourt(q, po) {
+  // Grammar Court: two posts shown, tap the wrong one
+  document.getElementById('playerQText').innerHTML=
+    `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--rb);display:block;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">⚖️ Grammar Court</span>${q.scenario}`;
+  po.style.display='none';
+  // Render as two post-cards inside a container
+  const container = document.createElement('div');
+  container.style.cssText='width:100%;display:flex;flex-direction:column;gap:1px;margin-bottom:1px;background:var(--border)';
+  (q.answers||[]).forEach((a,i)=>{
+    const card = document.createElement('div');
+    card.style.cssText='background:var(--surface);padding:16px;cursor:pointer;transition:background 0.1s;border-left:3px solid transparent';
+    card.innerHTML=`<div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700">${esc(a.name)}</div><div style="font-size:15px;font-weight:600;line-height:1.4">"${esc(a.text)}"</div>`;
+    card.onmouseover=()=>{if(!card.dataset.locked)card.style.background='var(--raised)'};
+    card.onmouseout=()=>{if(!card.dataset.locked)card.style.background='var(--surface)'};
+    card.onclick=()=>submitBossCourtVerdict(i, card, q, container);
+    container.appendChild(card);
+  });
+  // Insert after playerPostCard
+  const postCard = document.getElementById('playerPostCard');
+  postCard.parentNode.insertBefore(container, postCard.nextSibling);
+  window._bossContainer = container;
+}
+
+function submitBossCourtVerdict(idx, card, q, container) {
+  if(playerAnswered) return;
+  const isCorrect = idx === q.wrongIdx;
+  // Lock all cards
+  Array.from(container.children).forEach((c,i)=>{
+    c.dataset.locked='1';c.style.cursor='not-allowed';
+    if(i===q.wrongIdx) c.style.borderLeftColor='var(--wrong)';
+  });
+  if(isCorrect){
+    card.style.background='var(--wrong-dim)';card.style.borderLeftColor='var(--wrong)';
+    // Show why options
+    document.getElementById('playerFeedback').textContent='✓ Correct — now say why';
+    document.getElementById('playerFeedback').className='pfeedback fb-correct';
+    // Render why tiles
+    const jw=document.getElementById('justifyWrap');jw.style.display='block';
+    document.getElementById('justifyTiles').innerHTML=(q.whyOptions||[]).map((w,i)=>
+      `<div class="j-tile" onclick="submitBossCourtWhy(${i},this,${q.correctWhy},'${(q.explanation||'').replace(/'/g,"\'")}',${q.correctWhy})">${w}</div>`
+    ).join('');
+    db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:idx,time:Date.now()});
+  } else {
+    card.style.background='var(--wrong-dim)';
+    document.getElementById('playerFeedback').textContent='✗ Wrong — that one is correct';
+    document.getElementById('playerFeedback').className='pfeedback fb-wrong';
+    flashScreen('red');
+    playerAnswered=true;
+    db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:idx,time:Date.now(),wrong:true});
+  }
+}
+
+function submitBossCourtWhy(idx, el, correctWhy, explanation) {
+  if(playerAnswered) return;
+  playerAnswered=true;
+  const ok = idx===correctWhy;
+  document.querySelectorAll('.j-tile').forEach(t=>t.classList.add('locked'));
+  el.classList.add(ok?'j-correct':'j-wrong');
+  document.getElementById('playerFeedback').textContent=ok?'✓ Correct — right verdict, right reason':'✗ Right verdict, wrong reason';
+  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
+  if(ok)flashScreen('green'); else flashScreen('red');
+  if(explanation){
+    setTimeout(()=>{
+      document.getElementById('playerFeedback').textContent=explanation;
+      document.getElementById('playerFeedback').className='pfeedback fb-wait';
+    },1200);
+  }
+  db.ref(`rooms/${roomCode}/answers/${playerId}/whyIdx`).set(idx);
+}
+
+function renderBossDetective(q, po) {
+  document.getElementById('playerQText').innerHTML=
+    `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--rb);display:block;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">🔍 Feed Detective</span>${q.intro}`;
+  po.style.display='none';
+  // Render posts as mini post cards
+  const feed = document.createElement('div');
+  feed.style.cssText='width:100%;display:flex;flex-direction:column;gap:1px;margin-bottom:12px;background:var(--border)';
+  (q.posts||[]).forEach(p=>{
+    const card=document.createElement('div');
+    card.style.cssText='background:var(--surface);padding:12px 16px';
+    card.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--rc);font-weight:700">${esc(p.handle)}</span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">${esc(p.time)}</span></div><div style="font-size:14px;font-weight:500;line-height:1.4">${esc(p.text)}</div>`;
+    feed.appendChild(card);
+  });
+  // Question below feed
+  const qBox=document.createElement('div');
+  qBox.style.cssText='width:100%;padding:14px 16px;background:var(--raised);border-bottom:1px solid var(--border);font-size:14px;font-weight:600;margin-bottom:1px';
+  qBox.textContent=q.question;
+  const optsGrid=document.createElement('div');
+  optsGrid.style.cssText='width:100%;display:flex;flex-direction:column;gap:1px;background:var(--border)';
+  (q.options||[]).map((o,i)=>{
+    const btn=document.createElement('button');
+    btn.className='p-opt';
+    btn.style.cssText='text-align:left;font-size:14px;padding:16px;grid-column:auto';
+    btn.textContent=o;
+    btn.onclick=()=>submitDetective(i,btn,q.answer,q.explanation||'');
+    optsGrid.appendChild(btn);
+    return btn;
+  });
+  const postCard=document.getElementById('playerPostCard');
+  postCard.parentNode.insertBefore(feed,postCard.nextSibling);
+  postCard.parentNode.insertBefore(qBox,feed.nextSibling);
+  postCard.parentNode.insertBefore(optsGrid,qBox.nextSibling);
+  window._bossContainer=feed;
+}
+
+function submitDetective(idx, btn, correct, explanation) {
+  if(playerAnswered) return;
+  playerAnswered=true;
+  const ok=idx===correct;
+  // Disable all sibling buttons
+  btn.parentNode.querySelectorAll('button').forEach(b=>{
+    b.disabled=true;
+    if(b===btn){b.style.background=ok?'var(--correct-dim)':'var(--wrong-dim)';b.style.color=ok?'var(--correct)':'var(--wrong)';}
+    else if(b.textContent===(Array.isArray(btn.parentNode.querySelectorAll('button'))?btn.parentNode.querySelectorAll('button')[correct]:null)){b.style.background='var(--correct-dim)';b.style.color='var(--correct)';}
+  });
+  // Highlight correct
+  Array.from(btn.parentNode.querySelectorAll('button')).forEach((b,i)=>{if(i===correct){b.style.background='var(--correct-dim)';b.style.color='var(--correct)';}});
+  document.getElementById('playerFeedback').textContent=ok?'✓ Correct':'✗ Wrong';
+  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
+  flashScreen(ok?'green':'red');
+  if(explanation){setTimeout(()=>{document.getElementById('playerFeedback').textContent=explanation;document.getElementById('playerFeedback').className='pfeedback fb-wait';},1200);}
+  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:idx,time:Date.now()});
+}
+
+function renderBossImpossible(q, po) {
+  document.getElementById('playerQText').innerHTML=
+    `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--rb);display:block;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">🚫 Impossible Sentence</span>${q.prompt}`;
+  po.style.display='none';
+  const grid=document.createElement('div');
+  grid.style.cssText='width:100%;display:flex;flex-direction:column;gap:1px;margin-bottom:1px;background:var(--border)';
+  (q.sentences||[]).forEach((s,i)=>{
+    const btn=document.createElement('button');
+    btn.className='p-opt';
+    btn.style.cssText='text-align:left;font-size:15px;padding:18px 16px;font-family:"Inter",sans-serif;font-weight:500';
+    btn.innerHTML=`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:4px">${String.fromCharCode(65+i)}</span>${esc(s)}`;
+    btn.onclick=()=>submitImpossible(i,btn,q.answer,q.explanation||'',grid);
+    grid.appendChild(btn);
+  });
+  const postCard=document.getElementById('playerPostCard');
+  postCard.parentNode.insertBefore(grid,postCard.nextSibling);
+  window._bossContainer=grid;
+}
+
+function submitImpossible(idx, btn, correct, explanation, grid) {
+  if(playerAnswered) return;
+  playerAnswered=true;
+  const ok=idx===correct;
+  grid.querySelectorAll('button').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===correct){b.style.background='var(--wrong-dim)';b.style.color='var(--wrong)';}
+  });
+  if(ok){
+    btn.style.background='var(--wrong-dim)';btn.style.color='var(--wrong)';
+    document.getElementById('playerFeedback').textContent='✓ Found it!';
+    document.getElementById('playerFeedback').className='pfeedback fb-correct';
+    flashScreen('green');
+  } else {
+    document.getElementById('playerFeedback').textContent='✗ That one is possible — the impossible one is highlighted';
+    document.getElementById('playerFeedback').className='pfeedback fb-wrong';
+    flashScreen('red');
+  }
+  if(explanation){setTimeout(()=>{document.getElementById('playerFeedback').textContent=explanation;document.getElementById('playerFeedback').className='pfeedback fb-wait';},1200);}
+  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:idx,time:Date.now()});
+}
+
 // Clean up dynamically inserted boss elements between questions
+function cleanBossUI() {
+  if(window._bossContainer){
+    try{window._bossContainer.parentNode.removeChild(window._bossContainer);}catch(e){}
+    window._bossContainer=null;
+  }
+  // Remove any extra inserted nodes between playerPostCard and playerOptions
+  const postCard=document.getElementById('playerPostCard');
+  const pOpts=document.getElementById('playerOptions');
+  if(postCard&&pOpts){
+    let node=postCard.nextSibling;
+    while(node&&node!==document.getElementById('swipeArea')&&node!==pOpts){
+      const next=node.nextSibling;
+      if(node.nodeType===1&&!['playerOptions','swipeArea','sortWrap','boss-input-wrap','justifyWrap'].includes(node.id)){
+        node.parentNode.removeChild(node);
+      }
+      node=next;
+    }
+  }
+}
+
+function submitAnswer(chosen,btn,correct){
+  if(playerAnswered)return;playerAnswered=true;
+  document.querySelectorAll('.p-opt').forEach(b=>b.disabled=true);
+  const ok=chosen===correct;
+  btn.classList.add(ok?'answered-correct':'answered-wrong');
+  document.getElementById('playerFeedback').textContent=ok?'✓ Correct':'✗ Wrong';
+  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
+  flashScreen(ok?'green':'red');
+  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:chosen,time:Date.now()});
+}
+
+function submitSwipe(choice,btn){
+  if(playerAnswered)return;playerAnswered=true;
+  document.getElementById('swipePP').disabled=true;document.getElementById('swipePS').disabled=true;
+  const ok=choice===currentQ.answer;
+  btn.classList.add(ok?'chosen-correct':'chosen-wrong');
+  document.getElementById('playerFeedback').textContent=ok?'✓ Correct':'✗ Wrong';
+  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
+  flashScreen(ok?'green':'red');
+  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:choice,time:Date.now()});
+}
+
+function submitClash(idx,btn,correct){
+  if(playerAnswered)return;playerAnswered=true;
+  document.querySelectorAll('.p-opt').forEach(b=>b.disabled=true);
+  const ok=idx===parseInt(correct,10);
+  btn.classList.add(ok?'answered-correct':'answered-wrong');
+  document.getElementById('playerFeedback').textContent=ok?'✓ Correct':'✗ Wrong';
+  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
+  flashScreen(ok?'green':'red');
+  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:idx,time:Date.now()});
+}
+
+function submitJustify(chosen,btn,correct){
+  if(playerAnswered)return;playerAnswered=true;
+  document.querySelectorAll('.p-opt').forEach(b=>b.disabled=true);
+  const ok=chosen===correct;
+  btn.classList.add(ok?'answered-correct':'answered-wrong');
+  document.getElementById('playerFeedback').textContent=ok?'✓ Correct — now justify it':'✗ Wrong';
+  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
+  flashScreen(ok?'green':'red');
+  if(ok&&currentQ.justifyOptions){
+    const jw=document.getElementById('justifyWrap');jw.style.display='block';
+    document.getElementById('justifyTiles').innerHTML=(currentQ.justifyOptions||[]).map((j,i)=>
+      `<div class="j-tile" onclick="submitJustifyTile(${i},this)">${j}</div>`
+    ).join('');
+  }
+  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:chosen,time:Date.now()});
+}
+
+function submitJustifyTile(idx,el){
+  if(playerJustified)return;playerJustified=true;
+  const ok=idx===currentQ.correctJustify;
+  document.querySelectorAll('.j-tile').forEach(t=>t.classList.add('locked'));
+  el.classList.add(ok?'j-correct':'j-wrong');
+  document.getElementById('playerFeedback').textContent=ok?'✓ Right answer + right reason — bonus!':'✗ Right answer, wrong reason — no bonus';
+  db.ref(`rooms/${roomCode}/answers/${playerId}/justify`).set(idx);
+}
+
+function submitBossAnswer(){
+  if(playerAnswered)return;
+  const val=document.getElementById('bossInput').value.trim();if(!val)return;
+  playerAnswered=true;
+  document.getElementById('bossInput').disabled=true;
+  document.querySelector('#boss-input-wrap button').disabled=true;
+  const ok=currentQ&&fuzzyMatch(val,currentQ.answer);
+  document.getElementById('playerFeedback').textContent=ok?'✓ Looks right — waiting for confirm':'⏳ Submitted — wait for reveal';
+  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wait');
+  if(ok)flashScreen('boss');
+  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:val,time:Date.now()});
+}
+
+function showPlayerReveal(q){
+  document.getElementById('bossInput').disabled=true;
+  const bb=document.querySelector('#boss-input-wrap button');if(bb)bb.disabled=true;
+  document.querySelectorAll('.p-opt').forEach(b=>{
+    b.disabled=true;
+    if(!b.classList.contains('answered-wrong')&&!b.classList.contains('answered-correct')){
+      if(b.textContent.trim()===q.answer)b.classList.add('reveal-correct');
+    }
+  });
+  if(q.type==='binary'){
+    const cb=document.getElementById(q.answer==='pp'?'swipePP':'swipePS');
+    if(cb&&!cb.classList.contains('chosen-correct')&&!cb.classList.contains('chosen-wrong'))cb.classList.add('reveal-correct');
+  }
+  if(!playerAnswered){
+    document.getElementById('playerFeedback').textContent=`Time's up — answer: ${typeof q.answer==='number'?(q.options||[])[q.answer]:q.answer}`;
+    document.getElementById('playerFeedback').className='pfeedback fb-wrong';
+  }
+  if(q.explanation){
+    setTimeout(()=>{
+      document.getElementById('playerFeedback').textContent=q.explanation;
+      document.getElementById('playerFeedback').className='pfeedback fb-wait';
+    },1200);
+  }
+}
+
+function startPlayerTimer(startTime){
+  clearInterval(playerTimerInterval);
+  const bar=document.getElementById('playerTimerBar');
+  bar.className='timer-fill';bar.style.width='100%';
+  db.ref('rooms/'+roomCode+'/duration').once('value',snap=>{
+    const dur=snap.val()||12000;
+    playerTimerInterval=setInterval(()=>{
+      const pct=Math.max(0,1-(Date.now()-startTime)/dur);
+      bar.style.width=(pct*100)+'%';
+      if(pct<0.25)bar.className='timer-fill urgent';
+      if(pct<=0)clearInterval(playerTimerInterval);
+    },80);
+  });
+}
+
+function showPlayerEnd(){
+  clearInterval(playerTimerInterval);
+  if(stateListener)db.ref('rooms/'+roomCode+'/currentQ').off('value',stateListener);
+  if(playerScoreListener)db.ref(`rooms/${roomCode}/players/${playerId}`).off('value',playerScoreListener);
+  if(playerStatusListener)db.ref('rooms/'+roomCode+'/status').off('value',playerStatusListener);
+  db.ref('rooms/'+roomCode+'/players').once('value',snap=>{
+    const players=Object.values(snap.val()||{}).sort((a,b)=>b.score-a.score);
+    const myRank=players.findIndex(p=>p.name===playerName)+1;
+    const medals=['🥇','🥈','🥉'];
+    document.getElementById('endSubtitle').textContent=`You scored ${playerScore} · Rank ${myRank} of ${players.length}`;
+    document.getElementById('finalLeaderboard').innerHTML=players.map((p,i)=>
+      `<div class="podium-row ${i<3?'p'+(i+1):''} ${p.name===playerName?'top':''}">
+        <span class="podium-medal">${medals[i]||(i+1)+'.'}</span>
+        <span class="podium-name">${esc(p.name)}${p.name===playerName?' ← you':''}</span>
+        <span class="podium-score">${p.score||0}</span>
+      </div>`
+    ).join('');
+    goTo('end');
+  });
+}
+
 // ═══════════════════════
 // SOLO
 // ═══════════════════════
@@ -1368,510 +2086,6 @@ function sShowEnd(){
   document.getElementById('s-endMessage').textContent=message;
   goTo('s-end-screen');
 }
-
-
-// ═══════════════════════
-// PLAYER FUNCTIONS
-// ═══════════════════════
-
-function joinRoom(){
-  const name=document.getElementById('joinName').value.trim();
-  const code=document.getElementById('joinCode').value.trim().toUpperCase();
-  const err=document.getElementById('joinError');
-  if(!name){err.textContent='Enter your name';return;}
-  if(code.length!==4){err.textContent='Code must be 4 characters';return;}
-  err.textContent='';
-  db.ref('rooms/'+code).once('value',snap=>{
-    if(!snap.exists()){err.textContent='PIN not found — check with your teacher';return;}
-    if(snap.val().status==='ended'){err.textContent='This game has ended';return;}
-    playerId='p_'+Date.now()+'_'+Math.random().toString(36).substr(2,4);
-    playerName=name;roomCode=code;MODE='player';
-    playerScore=0;playerStreak=0;playerAnswered=false;playerJustified=false;
-    db.ref(`rooms/${code}/players/${playerId}`).set({name,score:0,streak:0});
-    db.ref(`rooms/${code}/players/${playerId}`).onDisconnect().remove();
-    goTo('player-waiting');
-    document.getElementById('playerWaitStatus').textContent='Waiting for host…';
-    document.getElementById('playerScoreWait').textContent='0';
-    listenForGameState();
-  });
-}
-
-
-
-function listenForGameState(){
-  stateListener=db.ref('rooms/'+roomCode+'/currentQ').on('value',snap=>{
-    const q=snap.val();if(!q)return;
-    if(!q.revealed){
-      playerAnswered=false;playerJustified=false;currentQ=q;
-      setRoundColor(q.round);
-      goTo('player-game');
-      setPostAvatar('playerAvatar','playerHandle',q.round);
-      renderPlayerQuestion(q);
-      startPlayerTimer(q.startTime);
-    } else {showPlayerReveal(q);}
-  });
-  playerScoreListener=db.ref(`rooms/${roomCode}/players/${playerId}`).on('value',snap=>{
-    const p=snap.val();if(!p)return;
-    playerScore=p.score||0;playerStreak=p.streak||0;
-    document.getElementById('playerScore').textContent=playerScore;
-    document.getElementById('playerStreak').textContent=playerStreak;
-    document.getElementById('playerScoreWait').textContent=playerScore;
-  });
-  playerStatusListener=db.ref('rooms/'+roomCode+'/status').on('value',snap=>{
-    if(snap.val()==='ended')showPlayerEnd();
-  });
-}
-
-
-
-function renderPlayerQuestion(q){
-  cleanBossUI();
-  const po=document.getElementById('playerOptions');
-  po.innerHTML='';po.style.display='grid';
-  po.style.gridTemplateColumns='1fr 1fr';
-  document.getElementById('swipeArea').style.display='none';
-  document.getElementById('sortWrap').style.display='none';
-  document.getElementById('boss-input-wrap').style.display='none';
-  document.getElementById('justifyWrap').style.display='none';
-  document.getElementById('playerFeedback').textContent='';
-  document.getElementById('playerFeedback').className='pfeedback';
-
-  if(q.type==='binary'){
-    document.getElementById('playerQText').innerHTML=
-      `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:12px;letter-spacing:0.1em;text-transform:uppercase">Present Perfect or Past Simple?</span><strong>"${q.text}"</strong>`;
-    po.style.display='none';
-    const sa=document.getElementById('swipeArea');sa.style.display='flex';
-    document.getElementById('swipePP').disabled=false;
-    document.getElementById('swipePS').disabled=false;
-    document.getElementById('swipePP').className='swipe-btn swipe-pp';
-    document.getElementById('swipePS').className='swipe-btn swipe-ps';
-  } else if(q.type==='clash'){
-    document.getElementById('playerQText').innerHTML=
-      `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase">Which fits the scene?</span>${q.context}`;
-    po.style.display='grid';
-    po.style.gridTemplateColumns='1fr';
-    po.innerHTML=(q.options||[]).map((o,i)=>
-      `<button class="p-opt" onclick="submitClash(${i},this,${q.answer})" style="text-align:left;font-size:14px">${o}</button>`
-    ).join('');
-  } else if(q.type==='boss'){
-    if(q.bossType==='court'){
-      renderBossCourt(q, po);
-    } else if(q.bossType==='detective'){
-      renderBossDetective(q, po);
-    } else if(q.bossType==='impossible'){
-      renderBossImpossible(q, po);
-    } else {
-      // Legacy text-input boss
-      document.getElementById('playerQText').innerHTML=
-        `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--rb);display:block;margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase">🔔 Boss question</span>${q.text}`;
-      po.style.display='none';
-      const biw=document.getElementById('boss-input-wrap');biw.style.display='block';
-      const bi=document.getElementById('bossInput');bi.value='';bi.disabled=false;
-      document.getElementById('bossHint').textContent=q.hint?`Hint: ${q.hint}`:'';
-      biw.querySelector('button').disabled=false;
-      setTimeout(()=>bi.focus(),150);
-    }
-  } else if(q.type==='justify'){
-    document.getElementById('playerQText').innerHTML=
-      (q.context?`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase">${q.context}</span>`:'')
-      +(q.text||'').replace('___',`<span style="border-bottom:2.5px solid var(--rc);color:var(--rc);padding:0 6px">___</span>`);
-    po.innerHTML=(q.options||[]).map(o=>
-      `<button class="p-opt" onclick="submitJustify('${o.replace(/'/g,"\\'")}',this,'${(q.answer||'').replace(/'/g,"\\'")}')"> ${o}</button>`
-    ).join('');
-  } else if(q.type==='nolabels'){
-    document.getElementById('playerQText').innerHTML=
-      (q.context?`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">${q.context}</span>`:'')
-      +(q.text||'');
-    po.style.gridTemplateColumns='1fr';
-    po.innerHTML=(q.options||[]).map(o=>
-      `<button class="p-opt" onclick="submitAnswer('${o.replace(/'/g,"\'")}',this,'${(q.answer||'').replace(/'/g,"\'")}'" style="text-align:left;font-size:15px;padding:18px 16px">${o}</button>`
-    ).join('');
-  } else {
-    document.getElementById('playerQText').innerHTML=
-      (q.context?`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase">${q.context}</span>`:'')
-      +(q.text||'').replace('___',`<span style="border-bottom:2.5px solid var(--rc);color:var(--rc);padding:0 6px;font-style:italic">___</span>`);
-    po.innerHTML=(q.options||[]).map(o=>
-      `<button class="p-opt" onclick="submitAnswer('${o.replace(/'/g,"\\'")}',this,'${(q.answer||'').replace(/'/g,"\\'")}')"> ${o}</button>`
-    ).join('');
-  }
-}
-
-
-
-function submitAnswer(chosen,btn,correct){
-  if(playerAnswered)return;playerAnswered=true;
-  document.querySelectorAll('.p-opt').forEach(b=>b.disabled=true);
-  const ok=chosen===correct;
-  btn.classList.add(ok?'answered-correct':'answered-wrong');
-  document.getElementById('playerFeedback').textContent=ok?'✓ Correct':'✗ Wrong';
-  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
-  flashScreen(ok?'green':'red');
-  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:chosen,time:Date.now()});
-}
-
-
-
-function submitSwipe(choice,btn){
-  if(playerAnswered)return;playerAnswered=true;
-  document.getElementById('swipePP').disabled=true;document.getElementById('swipePS').disabled=true;
-  const ok=choice===currentQ.answer;
-  btn.classList.add(ok?'chosen-correct':'chosen-wrong');
-  document.getElementById('playerFeedback').textContent=ok?'✓ Correct':'✗ Wrong';
-  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
-  flashScreen(ok?'green':'red');
-  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:choice,time:Date.now()});
-}
-
-
-
-function submitClash(idx,btn,correct){
-  if(playerAnswered)return;playerAnswered=true;
-  document.querySelectorAll('.p-opt').forEach(b=>b.disabled=true);
-  const ok=idx===parseInt(correct,10);
-  btn.classList.add(ok?'answered-correct':'answered-wrong');
-  document.getElementById('playerFeedback').textContent=ok?'✓ Correct':'✗ Wrong';
-  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
-  flashScreen(ok?'green':'red');
-  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:idx,time:Date.now()});
-}
-
-
-
-function submitJustify(chosen,btn,correct){
-  if(playerAnswered)return;playerAnswered=true;
-  document.querySelectorAll('.p-opt').forEach(b=>b.disabled=true);
-  const ok=chosen===correct;
-  btn.classList.add(ok?'answered-correct':'answered-wrong');
-  document.getElementById('playerFeedback').textContent=ok?'✓ Correct — now justify it':'✗ Wrong';
-  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
-  flashScreen(ok?'green':'red');
-  if(ok&&currentQ.justifyOptions){
-    const jw=document.getElementById('justifyWrap');jw.style.display='block';
-    document.getElementById('justifyTiles').innerHTML=(currentQ.justifyOptions||[]).map((j,i)=>
-      `<div class="j-tile" onclick="submitJustifyTile(${i},this)">${j}</div>`
-    ).join('');
-  }
-  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:chosen,time:Date.now()});
-}
-
-
-
-function submitJustifyTile(idx,el){
-  if(playerJustified)return;playerJustified=true;
-  const ok=idx===currentQ.correctJustify;
-  document.querySelectorAll('.j-tile').forEach(t=>t.classList.add('locked'));
-  el.classList.add(ok?'j-correct':'j-wrong');
-  document.getElementById('playerFeedback').textContent=ok?'✓ Right answer + right reason — bonus!':'✗ Right answer, wrong reason — no bonus';
-  db.ref(`rooms/${roomCode}/answers/${playerId}/justify`).set(idx);
-}
-
-
-
-function submitBossAnswer(){
-  if(playerAnswered)return;
-  const val=document.getElementById('bossInput').value.trim();if(!val)return;
-  playerAnswered=true;
-  document.getElementById('bossInput').disabled=true;
-  document.querySelector('#boss-input-wrap button').disabled=true;
-  const ok=currentQ&&fuzzyMatch(val,currentQ.answer);
-  document.getElementById('playerFeedback').textContent=ok?'✓ Looks right — waiting for confirm':'⏳ Submitted — wait for reveal';
-  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wait');
-  if(ok)flashScreen('boss');
-  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:val,time:Date.now()});
-}
-
-
-
-function showPlayerReveal(q){
-  document.getElementById('bossInput').disabled=true;
-  const bb=document.querySelector('#boss-input-wrap button');if(bb)bb.disabled=true;
-  document.querySelectorAll('.p-opt').forEach(b=>{
-    b.disabled=true;
-    if(!b.classList.contains('answered-wrong')&&!b.classList.contains('answered-correct')){
-      if(b.textContent.trim()===q.answer)b.classList.add('reveal-correct');
-    }
-  });
-  if(q.type==='binary'){
-    const cb=document.getElementById(q.answer==='pp'?'swipePP':'swipePS');
-    if(cb&&!cb.classList.contains('chosen-correct')&&!cb.classList.contains('chosen-wrong'))cb.classList.add('reveal-correct');
-  }
-  if(!playerAnswered){
-    document.getElementById('playerFeedback').textContent=`Time's up — answer: ${typeof q.answer==='number'?(q.options||[])[q.answer]:q.answer}`;
-    document.getElementById('playerFeedback').className='pfeedback fb-wrong';
-  }
-  if(q.explanation){
-    setTimeout(()=>{
-      document.getElementById('playerFeedback').textContent=q.explanation;
-      document.getElementById('playerFeedback').className='pfeedback fb-wait';
-    },1200);
-  }
-}
-
-
-
-function startPlayerTimer(startTime){
-  clearInterval(playerTimerInterval);
-  const bar=document.getElementById('playerTimerBar');
-  bar.className='timer-fill';bar.style.width='100%';
-  db.ref('rooms/'+roomCode+'/duration').once('value',snap=>{
-    const dur=snap.val()||12000;
-    playerTimerInterval=setInterval(()=>{
-      const pct=Math.max(0,1-(Date.now()-startTime)/dur);
-      bar.style.width=(pct*100)+'%';
-      if(pct<0.25)bar.className='timer-fill urgent';
-      if(pct<=0)clearInterval(playerTimerInterval);
-    },80);
-  });
-}
-
-
-
-function showPlayerEnd(){
-  clearInterval(playerTimerInterval);
-  if(stateListener)db.ref('rooms/'+roomCode+'/currentQ').off('value',stateListener);
-  if(playerScoreListener)db.ref(`rooms/${roomCode}/players/${playerId}`).off('value',playerScoreListener);
-  if(playerStatusListener)db.ref('rooms/'+roomCode+'/status').off('value',playerStatusListener);
-  db.ref('rooms/'+roomCode+'/players').once('value',snap=>{
-    const players=Object.values(snap.val()||{}).sort((a,b)=>b.score-a.score);
-    const myRank=players.findIndex(p=>p.name===playerName)+1;
-    const medals=['🥇','🥈','🥉'];
-    document.getElementById('endSubtitle').textContent=`You scored ${playerScore} · Rank ${myRank} of ${players.length}`;
-    document.getElementById('finalLeaderboard').innerHTML=players.map((p,i)=>
-      `<div class="podium-row ${i<3?'p'+(i+1):''} ${p.name===playerName?'top':''}">
-        <span class="podium-medal">${medals[i]||(i+1)+'.'}</span>
-        <span class="podium-name">${esc(p.name)}${p.name===playerName?' ← you':''}</span>
-        <span class="podium-score">${p.score||0}</span>
-      </div>`
-    ).join('');
-    goTo('end');
-  });
-}
-
-
-
-function renderBossCourt(q, po) {
-  // Grammar Court: two posts shown, tap the wrong one
-  document.getElementById('playerQText').innerHTML=
-    `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--rb);display:block;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">⚖️ Grammar Court</span>${q.scenario}`;
-  po.style.display='none';
-  // Render as two post-cards inside a container
-  const container = document.createElement('div');
-  container.style.cssText='width:100%;display:flex;flex-direction:column;gap:1px;margin-bottom:1px;background:var(--border)';
-  (q.answers||[]).forEach((a,i)=>{
-    const card = document.createElement('div');
-    card.style.cssText='background:var(--surface);padding:16px;cursor:pointer;transition:background 0.1s;border-left:3px solid transparent';
-    card.innerHTML=`<div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700">${esc(a.name)}</div><div style="font-size:15px;font-weight:600;line-height:1.4">"${esc(a.text)}"</div>`;
-    card.onmouseover=()=>{if(!card.dataset.locked)card.style.background='var(--raised)'};
-    card.onmouseout=()=>{if(!card.dataset.locked)card.style.background='var(--surface)'};
-    card.onclick=()=>submitBossCourtVerdict(i, card, q, container);
-    container.appendChild(card);
-  });
-  // Insert after playerPostCard
-  const postCard = document.getElementById('playerPostCard');
-  postCard.parentNode.insertBefore(container, postCard.nextSibling);
-  window._bossContainer = container;
-}
-
-
-
-function submitBossCourtVerdict(idx, card, q, container) {
-  if(playerAnswered) return;
-  const isCorrect = idx === q.wrongIdx;
-  // Lock all cards
-  Array.from(container.children).forEach((c,i)=>{
-    c.dataset.locked='1';c.style.cursor='not-allowed';
-    if(i===q.wrongIdx) c.style.borderLeftColor='var(--wrong)';
-  });
-  if(isCorrect){
-    card.style.background='var(--wrong-dim)';card.style.borderLeftColor='var(--wrong)';
-    // Show why options
-    document.getElementById('playerFeedback').textContent='✓ Correct — now say why';
-    document.getElementById('playerFeedback').className='pfeedback fb-correct';
-    // Render why tiles
-    const jw=document.getElementById('justifyWrap');jw.style.display='block';
-    document.getElementById('justifyTiles').innerHTML=(q.whyOptions||[]).map((w,i)=>
-      `<div class="j-tile" onclick="submitBossCourtWhy(${i},this,${q.correctWhy},'${(q.explanation||'').replace(/'/g,"\'")}',${q.correctWhy})">${w}</div>`
-    ).join('');
-    db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:idx,time:Date.now()});
-  } else {
-    card.style.background='var(--wrong-dim)';
-    document.getElementById('playerFeedback').textContent='✗ Wrong — that one is correct';
-    document.getElementById('playerFeedback').className='pfeedback fb-wrong';
-    flashScreen('red');
-    playerAnswered=true;
-    db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:idx,time:Date.now(),wrong:true});
-  }
-}
-
-
-
-function submitBossCourtWhy(idx, el, correctWhy, explanation) {
-  if(playerAnswered) return;
-  playerAnswered=true;
-  const ok = idx===correctWhy;
-  document.querySelectorAll('.j-tile').forEach(t=>t.classList.add('locked'));
-  el.classList.add(ok?'j-correct':'j-wrong');
-  document.getElementById('playerFeedback').textContent=ok?'✓ Correct — right verdict, right reason':'✗ Right verdict, wrong reason';
-  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
-  if(ok)flashScreen('green'); else flashScreen('red');
-  if(explanation){
-    setTimeout(()=>{
-      document.getElementById('playerFeedback').textContent=explanation;
-      document.getElementById('playerFeedback').className='pfeedback fb-wait';
-    },1200);
-  }
-  db.ref(`rooms/${roomCode}/answers/${playerId}/whyIdx`).set(idx);
-}
-
-
-
-function renderBossDetective(q, po) {
-  document.getElementById('playerQText').innerHTML=
-    `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--rb);display:block;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">🔍 Feed Detective</span>${q.intro}`;
-  po.style.display='none';
-  // Render posts as mini post cards
-  const feed = document.createElement('div');
-  feed.style.cssText='width:100%;display:flex;flex-direction:column;gap:1px;margin-bottom:12px;background:var(--border)';
-  (q.posts||[]).forEach(p=>{
-    const card=document.createElement('div');
-    card.style.cssText='background:var(--surface);padding:12px 16px';
-    card.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--rc);font-weight:700">${esc(p.handle)}</span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">${esc(p.time)}</span></div><div style="font-size:14px;font-weight:500;line-height:1.4">${esc(p.text)}</div>`;
-    feed.appendChild(card);
-  });
-  // Question below feed
-  const qBox=document.createElement('div');
-  qBox.style.cssText='width:100%;padding:14px 16px;background:var(--raised);border-bottom:1px solid var(--border);font-size:14px;font-weight:600;margin-bottom:1px';
-  qBox.textContent=q.question;
-  const optsGrid=document.createElement('div');
-  optsGrid.style.cssText='width:100%;display:flex;flex-direction:column;gap:1px;background:var(--border)';
-  (q.options||[]).map((o,i)=>{
-    const btn=document.createElement('button');
-    btn.className='p-opt';
-    btn.style.cssText='text-align:left;font-size:14px;padding:16px;grid-column:auto';
-    btn.textContent=o;
-    btn.onclick=()=>submitDetective(i,btn,q.answer,q.explanation||'');
-    optsGrid.appendChild(btn);
-    return btn;
-  });
-  const postCard=document.getElementById('playerPostCard');
-  postCard.parentNode.insertBefore(feed,postCard.nextSibling);
-  postCard.parentNode.insertBefore(qBox,feed.nextSibling);
-  postCard.parentNode.insertBefore(optsGrid,qBox.nextSibling);
-  window._bossContainer=feed;
-}
-
-
-
-function submitDetective(idx, btn, correct, explanation) {
-  if(playerAnswered) return;
-  playerAnswered=true;
-  const ok=idx===correct;
-  // Disable all sibling buttons
-  btn.parentNode.querySelectorAll('button').forEach(b=>{
-    b.disabled=true;
-    if(b===btn){b.style.background=ok?'var(--correct-dim)':'var(--wrong-dim)';b.style.color=ok?'var(--correct)':'var(--wrong)';}
-    else if(b.textContent===(Array.isArray(btn.parentNode.querySelectorAll('button'))?btn.parentNode.querySelectorAll('button')[correct]:null)){b.style.background='var(--correct-dim)';b.style.color='var(--correct)';}
-  });
-  // Highlight correct
-  Array.from(btn.parentNode.querySelectorAll('button')).forEach((b,i)=>{if(i===correct){b.style.background='var(--correct-dim)';b.style.color='var(--correct)';}});
-  document.getElementById('playerFeedback').textContent=ok?'✓ Correct':'✗ Wrong';
-  document.getElementById('playerFeedback').className='pfeedback '+(ok?'fb-correct':'fb-wrong');
-  flashScreen(ok?'green':'red');
-  if(explanation){setTimeout(()=>{document.getElementById('playerFeedback').textContent=explanation;document.getElementById('playerFeedback').className='pfeedback fb-wait';},1200);}
-  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:idx,time:Date.now()});
-}
-
-
-
-function renderBossImpossible(q, po) {
-  document.getElementById('playerQText').innerHTML=
-    `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--rb);display:block;margin-bottom:10px;letter-spacing:0.1em;text-transform:uppercase">🚫 Impossible Sentence</span>${q.prompt}`;
-  po.style.display='none';
-  const grid=document.createElement('div');
-  grid.style.cssText='width:100%;display:flex;flex-direction:column;gap:1px;margin-bottom:1px;background:var(--border)';
-  (q.sentences||[]).forEach((s,i)=>{
-    const btn=document.createElement('button');
-    btn.className='p-opt';
-    btn.style.cssText='text-align:left;font-size:15px;padding:18px 16px;font-family:"Inter",sans-serif;font-weight:500';
-    btn.innerHTML=`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:block;margin-bottom:4px">${String.fromCharCode(65+i)}</span>${esc(s)}`;
-    btn.onclick=()=>submitImpossible(i,btn,q.answer,q.explanation||'',grid);
-    grid.appendChild(btn);
-  });
-  const postCard=document.getElementById('playerPostCard');
-  postCard.parentNode.insertBefore(grid,postCard.nextSibling);
-  window._bossContainer=grid;
-}
-
-
-
-function submitImpossible(idx, btn, correct, explanation, grid) {
-  if(playerAnswered) return;
-  playerAnswered=true;
-  const ok=idx===correct;
-  grid.querySelectorAll('button').forEach((b,i)=>{
-    b.disabled=true;
-    if(i===correct){b.style.background='var(--wrong-dim)';b.style.color='var(--wrong)';}
-  });
-  if(ok){
-    btn.style.background='var(--wrong-dim)';btn.style.color='var(--wrong)';
-    document.getElementById('playerFeedback').textContent='✓ Found it!';
-    document.getElementById('playerFeedback').className='pfeedback fb-correct';
-    flashScreen('green');
-  } else {
-    document.getElementById('playerFeedback').textContent='✗ That one is possible — the impossible one is highlighted';
-    document.getElementById('playerFeedback').className='pfeedback fb-wrong';
-    flashScreen('red');
-  }
-  if(explanation){setTimeout(()=>{document.getElementById('playerFeedback').textContent=explanation;document.getElementById('playerFeedback').className='pfeedback fb-wait';},1200);}
-  db.ref(`rooms/${roomCode}/answers/${playerId}`).set({answer:idx,time:Date.now()});
-}
-
-
-
-function cleanBossUI() {
-  if(window._bossContainer){
-    try{window._bossContainer.parentNode.removeChild(window._bossContainer);}catch(e){}
-    window._bossContainer=null;
-  }
-  // Remove any extra inserted nodes between playerPostCard and playerOptions
-  const postCard=document.getElementById('playerPostCard');
-  const pOpts=document.getElementById('playerOptions');
-  if(postCard&&pOpts){
-    let node=postCard.nextSibling;
-    while(node&&node!==document.getElementById('swipeArea')&&node!==pOpts){
-      const next=node.nextSibling;
-      if(node.nodeType===1&&!['playerOptions','swipeArea','sortWrap','boss-input-wrap','justifyWrap'].includes(node.id)){
-        node.parentNode.removeChild(node);
-      }
-      node=next;
-    }
-  }
-}
-
-
-
-
-// ═══════════════════════
-// STUDENT INIT
-// ═══════════════════════
-const STUDENT_JOIN_URL = window.location.href.split('?')[0]; // base URL for QR target
-
-window.addEventListener('DOMContentLoaded', () => {
-  const params = new URLSearchParams(window.location.search);
-  const pin = params.get('pin');
-  if (pin) {
-    // Came from QR code scan — go straight to join with PIN pre-filled
-    goTo('join-screen');
-    const codeEl = document.getElementById('joinCode');
-    if (codeEl) codeEl.value = pin.toUpperCase();
-    setTimeout(() => {
-      const nameEl = document.getElementById('joinName');
-      if (nameEl) nameEl.focus();
-    }, 200);
-  }
-  // Otherwise show default menu (join + solo)
-});
-
 </script>
 </body>
 </html>
